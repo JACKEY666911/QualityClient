@@ -129,6 +129,77 @@ QRadioButton::indicator:checked
 {
     background-color: #2196F3;
 }
+
+/* ===============================
+   Base
+================================= */
+QDateEdit, QTimeEdit {
+    background: white;
+    border: 1px solid #E0E0E0;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 14px;
+    min-height: 36px;
+}
+
+/* Hover */
+QDateEdit:hover, QTimeEdit:hover {
+    border: 1px solid #90CAF9;
+}
+
+/* Focus */
+QDateEdit:focus, QTimeEdit:focus {
+    border: 1px solid #2196F3;
+}
+
+/* 禁用 3D 按钮 */
+QDateEdit::drop-down {
+    border: none;
+    width: 24px;
+    background: transparent;
+}
+
+/* 箭头（可换成 svg 图标） */
+QDateEdit::down-arrow {
+    image: url(:/icons/calendar.svg);
+    width: 14px;
+    height: 14px;
+}
+
+/* ===============================
+   Calendar Popup
+================================= */
+
+QCalendarWidget {
+    background: white;
+    border: 1px solid #E0E0E0;
+    border-radius: 8px;
+}
+
+/* 顶部导航栏 */
+QCalendarWidget QWidget#qt_calendar_navigationbar {
+    background-color: white;
+    border-bottom: 1px solid #EEEEEE;
+}
+
+/* 月份按钮 */
+QCalendarWidget QToolButton {
+    border: none;
+    background: transparent;
+    color: #424242;
+    font-weight: bold;
+}
+
+QCalendarWidget QToolButton:hover {
+    color: #2196F3;
+}
+
+/* 日期区域 */
+QCalendarWidget QAbstractItemView {
+    selection-background-color: #2196F3;
+    selection-color: white;
+    outline: none;
+}
 </string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -428,6 +499,12 @@ QRadioButton::indicator:checked
          <enum>QFrame::Sunken</enum>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_3">
+         <property name="spacing">
+          <number>10</number>
+         </property>
+         <property name="leftMargin">
+          <number>40</number>
+         </property>
          <item>
           <widget class="QRadioButton" name="realRadioButton">
            <property name="sizePolicy">
@@ -453,9 +530,65 @@ QRadioButton::indicator:checked
          <item>
           <widget class="QLabel" name="label_3">
            <property name="text">
-            <string>支持选择特定通道，接受选定通道范围内实时新增的待质控任务图像。</string>
+            <string>    支持选择特定通道，接受选定通道范围内实时新增的待质控任务图像。</string>
            </property>
           </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="0,10,1">
+           <property name="leftMargin">
+            <number>50</number>
+           </property>
+           <item>
+            <widget class="QLabel" name="label_5">
+             <property name="text">
+              <string>请选择通道：</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="comboBox">
+             <property name="minimumSize">
+              <size>
+               <width>245</width>
+               <height>35</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>800</width>
+               <height>16777215</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_10">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <spacer name="verticalSpacer">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
          </item>
         </layout>
        </widget>
@@ -548,6 +681,93 @@ QRadioButton::indicator:checked
          </property>
          <property name="text">
           <string>全部图像</string>
+         </property>
+        </widget>
+        <widget class="QWidget" name="layoutWidget">
+         <property name="geometry">
+          <rect>
+           <x>50</x>
+           <y>140</y>
+           <width>1829</width>
+           <height>37</height>
+          </rect>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_5" stretch="0,10,1">
+          <property name="leftMargin">
+           <number>50</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="label_6">
+            <property name="text">
+             <string>请选择通道：</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="comboBox_2">
+            <property name="minimumSize">
+             <size>
+              <width>245</width>
+              <height>35</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>800</width>
+              <height>16777215</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_11">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QLabel" name="label_7">
+         <property name="geometry">
+          <rect>
+           <x>100</x>
+           <y>200</y>
+           <width>54</width>
+           <height>12</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>TextLabel</string>
+         </property>
+        </widget>
+        <widget class="QDateTimeEdit" name="dateTimeEdit">
+         <property name="geometry">
+          <rect>
+           <x>180</x>
+           <y>200</y>
+           <width>194</width>
+           <height>22</height>
+          </rect>
+         </property>
+         <property name="calendarPopup">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QTimeEdit" name="timeEdit">
+         <property name="geometry">
+          <rect>
+           <x>390</x>
+           <y>200</y>
+           <width>118</width>
+           <height>50</height>
+          </rect>
          </property>
         </widget>
        </widget>

@@ -30,6 +30,7 @@ SOURCES += \
     MixModeSelectView.cpp \
     main.cpp \
     MainWindow.cpp \
+    services/httpclient.cpp \
     services/messagequeue.cpp \
     services/settingsservice.cpp \
     widgets/CheckBoxDelegate.cpp \
@@ -41,6 +42,7 @@ HEADERS += \
     MainView.h \
     MainWindow.h \
     MixModeSelectView.h \
+    services/httpclient.h \
     services/messagequeue.h \
     services/settingsservice.h \
     widgets/CheckBoxDelegate.h \

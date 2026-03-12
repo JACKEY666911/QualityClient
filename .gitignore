@@ -22,18 +22,21 @@ qrc_*.cpp
 moc_*.cpp
 moc_*.h
 ui_*.h
-/src/.qmake.stash
+.qmake.stash
 /src/Makefile
 /src/QOwnNotes
 secrets/*
-
-
+debug
+release
+Makefile*
 # Devenv
 .devenv*
 devenv.local.nix
-
+*autosave
 # direnv
 .direnv
-
+*.prl
+*.pdb
+qamqpd.lib
 # pre-commit
 .pre-commit-config.yaml

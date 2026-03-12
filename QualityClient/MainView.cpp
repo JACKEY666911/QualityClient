@@ -1,4 +1,5 @@
 #include "MainView.h"
+#include "services/httpclient.h"
 #include "ui_MainView.h"
 
 #include <QVBoxLayout>
