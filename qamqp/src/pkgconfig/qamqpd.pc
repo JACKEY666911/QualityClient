@@ -1,0 +1,12 @@
+prefix=D:/Qt6.8.3/6.8.3/mingw_64
+exec_prefix=${prefix}
+libdir=${prefix}/lib
+includedir=${prefix}/include/qamqp
+
+
+Name: Qamqpd
+Description: Qamqpd Library
+Libs: -L${libdir} -lqamqpd 
+Libs.private: D:\Qt6.8.3\6.8.3\mingw_64\lib\libQt6Network.a D:\Qt6.8.3\6.8.3\mingw_64\lib\libQt6Core.a    
+Cflags: -DQAMQP_STATIC -I${includedir}
+

@@ -27,6 +27,7 @@ MixModeSelectView::MixModeSelectView(QWidget *parent) :
     CheckComBoBox* combo = new CheckComBoBox(this);
     combo->setAreas(list);
     ui->realFrame->layout()->addWidget(combo);
+
 }
 
 MixModeSelectView::~MixModeSelectView()
@@ -35,6 +36,16 @@ MixModeSelectView::~MixModeSelectView()
 }
 
 void MixModeSelectView::on_loginoutButton_clicked()
+{
+    emit loginOut();
+}
+
+void MixModeSelectView::on_switchToMainViewBtn_clicked()
+{
+    emit enterQualityControl();
+}
+
+void MixModeSelectView::on_loginOutBtn_clicked()
 {
     emit loginOut();
 }

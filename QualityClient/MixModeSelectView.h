@@ -16,8 +16,11 @@ public:
     ~MixModeSelectView();
 signals:
     void loginOut();
+    void enterQualityControl();
 private slots:
     void on_loginoutButton_clicked();
+    void on_switchToMainViewBtn_clicked();
+    void on_loginOutBtn_clicked();
 
 private:
     Ui::MixModeSelectView *ui;

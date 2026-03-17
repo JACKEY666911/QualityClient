@@ -1,6 +1,6 @@
 TARGET = QualityClient
 TEMPLATE = app
-QT       += core gui network
+QT       += core gui network concurrent
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -24,29 +24,49 @@ QMAKE_LFLAGS ~= s/-L/\\n-L/g
 message("dadadddeeq:\n$$QMAKE_LFLAGS")
 INCLUDEPATH += $$PWD/libraries
 SOURCES += \
+    Models/LayerViewModel.cpp \
+    Models/XrayImage.cpp \
+    DateTimePicker.cpp \
     GradientLabel.cpp \
     LoginView.cpp \
     MainView.cpp \
     MixModeSelectView.cpp \
+    QualityControlView.cpp \
     main.cpp \
     MainWindow.cpp \
     services/httpclient.cpp \
+    services/httpclientasync.cpp \
     services/messagequeue.cpp \
     services/settingsservice.cpp \
+    widgets/AnnotationGraphicsView.cpp \
+    widgets/ThumbnailWidget.cpp \
     widgets/CheckBoxDelegate.cpp \
-    widgets/CheckComBoBox.cpp
+    widgets/CheckComBoBox.cpp \
+    widgets/LayerViewWidget.cpp \
+    widgets/CollapsiblePanel.cpp \
+    widgets/SwitchButton.cpp
 
 HEADERS += \
+    Models/LayerViewModel.h \
+    Models/XrayImage.h \
+    DateTimePicker.h \
     GradientLabel.h \
     LoginView.h \
     MainView.h \
     MainWindow.h \
     MixModeSelectView.h \
+    QualityControlView.h \
     services/httpclient.h \
+    services/httpclientasync.h \
     services/messagequeue.h \
     services/settingsservice.h \
+    widgets/AnnotationGraphicsView.h \
+    widgets/ThumbnailWidget.h \
     widgets/CheckBoxDelegate.h \
-    widgets/CheckComBoBox.h
+    widgets/CheckComBoBox.h \
+    widgets/LayerViewWidget.h \
+    widgets/CollapsiblePanel.h \
+    widgets/SwitchButton.h
 
 FORMS += \
     LoginView.ui \
