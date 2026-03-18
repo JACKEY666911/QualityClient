@@ -40,3 +40,6 @@ devenv.local.nix
 qamqpd.lib
 # pre-commit
 .pre-commit-config.yaml
+.qtc_clangd/
+.qtc_clangd/*
+.qtc_clangd/**/*
