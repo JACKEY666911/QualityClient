@@ -26,7 +26,6 @@ INCLUDEPATH += $$PWD/libraries
 SOURCES += \
     Models/LayerViewModel.cpp \
     Models/XrayImage.cpp \
-    DateTimePicker.cpp \
     GradientLabel.cpp \
     LoginView.cpp \
     MainView.cpp \
@@ -44,12 +43,13 @@ SOURCES += \
     widgets/CheckComBoBox.cpp \
     widgets/LayerViewWidget.cpp \
     widgets/CollapsiblePanel.cpp \
-    widgets/SwitchButton.cpp
+    widgets/SwitchButton.cpp \
+    widgets/flowlayout.cpp \
+    widgets/paginationwidget.cpp
 
 HEADERS += \
     Models/LayerViewModel.h \
     Models/XrayImage.h \
-    DateTimePicker.h \
     GradientLabel.h \
     LoginView.h \
     MainView.h \
@@ -66,7 +66,9 @@ HEADERS += \
     widgets/CheckComBoBox.h \
     widgets/LayerViewWidget.h \
     widgets/CollapsiblePanel.h \
-    widgets/SwitchButton.h
+    widgets/SwitchButton.h \
+    widgets/flowlayout.h \
+    widgets/paginationwidget.h
 
 FORMS += \
     LoginView.ui \
