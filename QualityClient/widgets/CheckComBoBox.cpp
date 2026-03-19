@@ -1,5 +1,7 @@
 #include "CheckComBoBox.h"
 
+#include "CheckBoxDelegate.h"
+
 #include <QListView>
 #include <QLineEdit>
 CheckComBoBox::CheckComBoBox(QWidget *parent) : QComboBox(parent)

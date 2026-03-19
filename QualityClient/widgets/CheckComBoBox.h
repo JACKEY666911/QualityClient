@@ -1,7 +1,6 @@
 #ifndef CHECKCOMBOBOX_H
 #define CHECKCOMBOBOX_H
 
-#include "CheckBoxDelegate.h"
 #include <QComboBox>
 #include <QPointer>
 #include <QWidget>

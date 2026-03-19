@@ -26,7 +26,13 @@
    <string>Form</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">QWidget#titleWidget
+   <string notr="true">QFrame#realFrame[selected=&quot;true&quot;],
+QFrame#IntervalFrame[selected=&quot;true&quot;],
+QFrame#normalFrame[selected=&quot;true&quot;] {
+    background-color: #117595;
+}
+
+QWidget#titleWidget
 {
 	background:rgb(17, 117, 149);
 }
@@ -87,6 +93,19 @@ QPushButton#loginOutBtn
 	border-radius:5px;
 
 }
+
+QPushButton#retTimeBtn
+{	
+	border:1px solid black;
+	background-color:white;
+	font-family:&quot;Microsoft YaHei&quot;;
+	color:black;
+	font-size:12px;
+	font-weight:bold;
+	border-radius:5px;
+
+}
+
 QFrame#IntervalFrame
 {
 	border: 1px solid #ccc; 
@@ -120,85 +139,46 @@ QRadioButton::indicator
 {
     width: 15px;    /* 你要的宽度 */
     height: 15px;   /* 你要的高度 */
-	border: 2px solid #555555; /* 未选中时的边框 */
-    border-radius: 9px; /* 圆角半径设置为宽高的一半，形成正圆 */
+	border: 3px solid #555555; /* 未选中时的边框 */
+    border-radius: 10px; /* 圆角半径设置为宽高的一半，形成正圆 */
     background-color: white; /* 未选中时的内部背景 */
 }
 /* 单选按钮指示器（选中状态） */
 QRadioButton::indicator:checked 
 {
-    background-color: #2196F3;
+	background-color: black;      /* 中间的点是黑色 */
+    border: 3px solid white;      /* 用白色边框包裹黑点 */
+
 }
 
-/* ===============================
-   Base
-================================= */
-QDateEdit, QTimeEdit {
-    background: white;
-    border: 1px solid #E0E0E0;
-    border-radius: 6px;
-    padding: 6px 10px;
-    font-size: 14px;
-    min-height: 36px;
+QPushButton#TimeSelectButton_3
+{
+	background-color:&quot;#aaaaaa&quot;;
+	font-family:&quot;Microsoft YaHei&quot;;
+	font-weight:bold;
+    border-radius: 5px;
+	color:white;
 }
 
-/* Hover */
-QDateEdit:hover, QTimeEdit:hover {
-    border: 1px solid #90CAF9;
+QPushButton#TimeSelectButton_3:pressed
+{
+	 background-color: &quot;#292929&quot;;
 }
-
-/* Focus */
-QDateEdit:focus, QTimeEdit:focus {
-    border: 1px solid #2196F3;
+QPushButton#TimeSelectButton_5
+{
+	background-color:&quot;#aaaaaa&quot;;
+	font-family:&quot;Microsoft YaHei&quot;;
+	font-weight:bold;
+    border-radius: 5px;
+	color:white;
 }
-
-/* 禁用 3D 按钮 */
-QDateEdit::drop-down {
-    border: none;
-    width: 24px;
-    background: transparent;
-}
-
-/* 箭头（可换成 svg 图标） */
-QDateEdit::down-arrow {
-    image: url(:/icons/calendar.svg);
-    width: 14px;
-    height: 14px;
-}
-
-/* ===============================
-   Calendar Popup
-================================= */
-
-QCalendarWidget {
-    background: white;
-    border: 1px solid #E0E0E0;
-    border-radius: 8px;
-}
-
-/* 顶部导航栏 */
-QCalendarWidget QWidget#qt_calendar_navigationbar {
-    background-color: white;
-    border-bottom: 1px solid #EEEEEE;
-}
-
-/* 月份按钮 */
-QCalendarWidget QToolButton {
-    border: none;
-    background: transparent;
-    color: #424242;
-    font-weight: bold;
-}
-
-QCalendarWidget QToolButton:hover {
-    color: #2196F3;
-}
-
-/* 日期区域 */
-QCalendarWidget QAbstractItemView {
-    selection-background-color: #2196F3;
-    selection-color: white;
-    outline: none;
+QPushButton#TimeSelectButton_10
+{
+	background-color:&quot;#aaaaaa&quot;;
+	font-family:&quot;Microsoft YaHei&quot;;
+	font-weight:bold;
+    border-radius: 5px;
+	color:white;
 }
 </string>
   </property>
@@ -462,8 +442,14 @@ QCalendarWidget QAbstractItemView {
         <layout class="QHBoxLayout" name="horizontalLayout_3">
          <item>
           <widget class="QLabel" name="titleSelectLabel">
+           <property name="font">
+            <font>
+             <pointsize>17</pointsize>
+             <bold>true</bold>
+            </font>
+           </property>
            <property name="text">
-            <string>TextLabel</string>
+            <string>请选择质控模式</string>
            </property>
           </widget>
          </item>
@@ -482,8 +468,14 @@ QCalendarWidget QAbstractItemView {
          </item>
          <item>
           <widget class="QLabel" name="timeLabel">
+           <property name="font">
+            <font>
+             <pointsize>16</pointsize>
+             <bold>true</bold>
+            </font>
+           </property>
            <property name="text">
-            <string>TextLabel</string>
+            <string/>
            </property>
           </widget>
          </item>
@@ -498,9 +490,12 @@ QCalendarWidget QAbstractItemView {
         <property name="frameShadow">
          <enum>QFrame::Shadow::Sunken</enum>
         </property>
+        <property name="selected" stdset="0">
+         <bool>true</bool>
+        </property>
         <layout class="QVBoxLayout" name="verticalLayout_3">
          <property name="spacing">
-          <number>10</number>
+          <number>15</number>
          </property>
          <property name="leftMargin">
           <number>40</number>
@@ -529,8 +524,14 @@ QCalendarWidget QAbstractItemView {
          </item>
          <item>
           <widget class="QLabel" name="label_3">
+           <property name="font">
+            <font>
+             <pointsize>10</pointsize>
+             <italic>true</italic>
+            </font>
+           </property>
            <property name="text">
-            <string>    支持选择特定通道，接受选定通道范围内实时新增的待质控任务图像。</string>
+            <string>       支持选择特定通道，接受选定通道范围内实时新增的待质控任务图像。</string>
            </property>
           </widget>
          </item>
@@ -541,13 +542,28 @@ QCalendarWidget QAbstractItemView {
            </property>
            <item>
             <widget class="QLabel" name="label_5">
+             <property name="minimumSize">
+              <size>
+               <width>160</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+               <bold>true</bold>
+              </font>
+             </property>
              <property name="text">
               <string>请选择通道：</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QComboBox" name="comboBox">
+            <widget class="CheckComBoBox" name="realCheckComboBox">
              <property name="minimumSize">
               <size>
                <width>245</width>
@@ -601,248 +617,456 @@ QCalendarWidget QAbstractItemView {
         <property name="frameShadow">
          <enum>QFrame::Shadow::Sunken</enum>
         </property>
-        <widget class="QRadioButton" name="IntervalRadioButton">
-         <property name="geometry">
-          <rect>
-           <x>40</x>
-           <y>50</y>
-           <width>141</width>
-           <height>30</height>
-          </rect>
+        <property name="selected" stdset="0">
+         <bool>false</bool>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_4">
+         <property name="spacing">
+          <number>20</number>
          </property>
-         <property name="minimumSize">
-          <size>
-           <width>70</width>
-           <height>30</height>
-          </size>
+         <property name="leftMargin">
+          <number>40</number>
          </property>
-         <property name="baseSize">
-          <size>
-           <width>0</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>自选时段质控</string>
-         </property>
-         <property name="iconSize">
-          <size>
-           <width>30</width>
-           <height>30</height>
-          </size>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_2">
-         <property name="geometry">
-          <rect>
-           <x>60</x>
-           <y>90</y>
-           <width>691</width>
-           <height>16</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>支持选择特定通道、时间区间，接收选定范围内已经准备就绪的任务。可选择只看未质控图像任务，或条件范围内所有的图像任务。</string>
-         </property>
-        </widget>
-        <widget class="QRadioButton" name="radioButton_4">
-         <property name="geometry">
-          <rect>
-           <x>230</x>
-           <y>50</y>
-           <width>121</width>
-           <height>30</height>
-          </rect>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>30</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>未质控图像</string>
-         </property>
-        </widget>
-        <widget class="QRadioButton" name="radioButton_5">
-         <property name="geometry">
-          <rect>
-           <x>370</x>
-           <y>50</y>
-           <width>111</width>
-           <height>30</height>
-          </rect>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>30</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>全部图像</string>
-         </property>
-        </widget>
-        <widget class="QWidget" name="layoutWidget">
-         <property name="geometry">
-          <rect>
-           <x>50</x>
-           <y>140</y>
-           <width>1829</width>
-           <height>37</height>
-          </rect>
-         </property>
-         <layout class="QHBoxLayout" name="horizontalLayout_5" stretch="0,10,1">
-          <property name="leftMargin">
-           <number>50</number>
-          </property>
-          <item>
-           <widget class="QLabel" name="label_6">
-            <property name="text">
-             <string>请选择通道：</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QComboBox" name="comboBox_2">
-            <property name="minimumSize">
-             <size>
-              <width>245</width>
-              <height>35</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>800</width>
-              <height>16777215</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <spacer name="horizontalSpacer_11">
-            <property name="orientation">
-             <enum>Qt::Orientation::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
-        </widget>
-        <widget class="QLabel" name="label_7">
-         <property name="geometry">
-          <rect>
-           <x>100</x>
-           <y>200</y>
-           <width>54</width>
-           <height>12</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>TextLabel</string>
-         </property>
-        </widget>
-        <widget class="QDateTimeEdit" name="dateTimeEdit">
-         <property name="geometry">
-          <rect>
-           <x>180</x>
-           <y>200</y>
-           <width>194</width>
-           <height>22</height>
-          </rect>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">QCalendarWidget {
-            background-color: white;
-            border: none;
-            font: 16px &quot;Microsoft YaHei&quot;;
-        }
-
-        /* 导航栏：无背景，纯扁平 */
-        QCalendarWidget QWidget#qt_calendar_navigationbar {
-            background-color: transparent;
-        }
-
-        /* 导航栏按钮（&lt;&lt; &lt; &gt; &gt;&gt;） */
-        QCalendarWidget QToolButton {
-            border: none;
-            color: black;
-            font-size: 20px;
-            background: transparent;
-        }
-        QCalendarWidget QToolButton:hover {
-            background: transparent;
-        }
-
-        /* 年月标题按钮（2026 三月） */
-        QCalendarWidget QPushButton {
-            border: none;
-            color: black;
-            font-size: 20px;
-            background: transparent;
-        }
-        QCalendarWidget QPushButton:hover {
-            background: transparent;
-        }
-
-        /* 日期网格：无网格线 */
-        QCalendarWidget QTableWidget#qt_calendar_calendarview {
-            gridline-color: transparent;
-            background-color: white;
-        }
-
-        /* 普通日期单元格：纯文本 */
-        QCalendarWidget QTableWidget::item {
-            color: black;
-            text-align: center;
-            border: none;
-            padding: 8px;
-        }
-
-        /* 禁用日期（上月/下月）：浅灰色 */
-        QCalendarWidget QTableWidget::item:disabled {
-            color: #cccccc;
-        }
-
-        /* 选中日期：浅灰色背景块（匹配原图） */
-        QCalendarWidget QTableWidget::item:selected {
-            background-color: #e6e6e6;
-            color: black;
-        }
-
-        /* 今日标记：红色边框 + 红色文字（保留今日特殊样式） */
-        QCalendarWidget QTableWidget::item:today {
-            border: 1px solid #ff0000;
-            color: #ff0000;
-            font-weight: bold;
-        }
-
-        /* 今日且选中：叠加样式（避免冲突） */
-        QCalendarWidget QTableWidget::item:today:selected {
-            background-color: #e6e6e6;
-            border: 1px solid #ff0000;
-            color: #ff0000;
-        }</string>
-         </property>
-         <property name="calendarPopup">
-          <bool>true</bool>
-         </property>
-        </widget>
-        <widget class="QTimeEdit" name="timeEdit">
-         <property name="geometry">
-          <rect>
-           <x>390</x>
-           <y>200</y>
-           <width>118</width>
-           <height>50</height>
-          </rect>
-         </property>
-        </widget>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_8" stretch="0,0,0,0,3">
+           <item>
+            <widget class="QRadioButton" name="IntervalRadioButton">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>160</width>
+               <height>30</height>
+              </size>
+             </property>
+             <property name="baseSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>自选时段质控</string>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>30</width>
+               <height>30</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_9">
+             <property name="orientation">
+              <enum>Qt::Orientation::Horizontal</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Policy::Preferred</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>80</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="PartRadioBtn">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>30</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>未质控图像</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="AllradioBtn">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>30</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>全部图像</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_15">
+             <property name="orientation">
+              <enum>Qt::Orientation::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_2">
+           <property name="font">
+            <font>
+             <pointsize>10</pointsize>
+             <italic>true</italic>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="layoutDirection">
+            <enum>Qt::LayoutDirection::LeftToRight</enum>
+           </property>
+           <property name="text">
+            <string>       支持选择特定通道、时间区间，接收选定范围内已经准备就绪的任务。可选择只看未质控图像任务，或条件范围内所有的图像任务。</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_5" stretch="0,10,1">
+           <property name="leftMargin">
+            <number>50</number>
+           </property>
+           <item>
+            <widget class="QLabel" name="label_6">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>160</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>请选择通道：</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="CheckComBoBox" name="IntervalCheckComboBox">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>245</width>
+               <height>35</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>800</width>
+               <height>16777215</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_11">
+             <property name="orientation">
+              <enum>Qt::Orientation::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_6">
+           <property name="leftMargin">
+            <number>50</number>
+           </property>
+           <item>
+            <widget class="QLabel" name="label_8">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>160</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>请选择质控时间范围：</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="ModernDateTimeEdit" name="startTime">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>375</width>
+               <height>35</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>10</pointsize>
+               <bold>false</bold>
+              </font>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_7">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>20</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>50</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>10</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string> 至 </string>
+             </property>
+             <property name="scaledContents">
+              <bool>false</bool>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignmentFlag::AlignCenter</set>
+             </property>
+             <property name="margin">
+              <number>0</number>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="ModernDateTimeEdit" name="endTime">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>375</width>
+               <height>35</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>10</pointsize>
+               <bold>false</bold>
+              </font>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="retTimeBtn">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>90</width>
+               <height>35</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>重    置</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_12">
+             <property name="orientation">
+              <enum>Qt::Orientation::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_7" stretch="0,0,0,0,0">
+           <property name="spacing">
+            <number>6</number>
+           </property>
+           <property name="leftMargin">
+            <number>50</number>
+           </property>
+           <item>
+            <spacer name="horizontalSpacer_13">
+             <property name="orientation">
+              <enum>Qt::Orientation::Horizontal</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Policy::Preferred</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>175</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QPushButton" name="TimeSelectButton_3">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>90</width>
+               <height>35</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>3分钟</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="TimeSelectButton_5">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>90</width>
+               <height>35</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>5分钟</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="TimeSelectButton_10">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>90</width>
+               <height>35</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>10分钟</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_14">
+             <property name="orientation">
+              <enum>Qt::Orientation::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <spacer name="verticalSpacer_2">
+           <property name="orientation">
+            <enum>Qt::Orientation::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
        </widget>
       </item>
       <item>
@@ -853,76 +1077,131 @@ QCalendarWidget QAbstractItemView {
         <property name="frameShadow">
          <enum>QFrame::Shadow::Sunken</enum>
         </property>
-        <widget class="QRadioButton" name="normalradioButton">
-         <property name="geometry">
-          <rect>
-           <x>30</x>
-           <y>20</y>
-           <width>111</width>
-           <height>30</height>
-          </rect>
+        <property name="selected" stdset="0">
+         <bool>false</bool>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_5">
+         <property name="spacing">
+          <number>15</number>
          </property>
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>30</height>
-          </size>
+         <property name="leftMargin">
+          <number>40</number>
          </property>
-         <property name="text">
-          <string>普通质控</string>
-         </property>
-        </widget>
-        <widget class="QLabel" name="label_4">
-         <property name="geometry">
-          <rect>
-           <x>40</x>
-           <y>60</y>
-           <width>411</width>
-           <height>16</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>支持按时间倒序或正序对当日所有安检通道剩余的全部未质控图像进行质控。</string>
-         </property>
-        </widget>
-        <widget class="QRadioButton" name="radioButton_6">
-         <property name="geometry">
-          <rect>
-           <x>230</x>
-           <y>20</y>
-           <width>89</width>
-           <height>30</height>
-          </rect>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>30</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>倒序</string>
-         </property>
-        </widget>
-        <widget class="QRadioButton" name="radioButton_7">
-         <property name="geometry">
-          <rect>
-           <x>380</x>
-           <y>20</y>
-           <width>89</width>
-           <height>30</height>
-          </rect>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>30</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>倒序</string>
-         </property>
-        </widget>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_9" stretch="0,0,0,0,5">
+           <item>
+            <widget class="QRadioButton" name="normalradioButton">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>160</width>
+               <height>30</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <family>Microsoft YaHei</family>
+               <pointsize>-1</pointsize>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="layoutDirection">
+              <enum>Qt::LayoutDirection::LeftToRight</enum>
+             </property>
+             <property name="text">
+              <string>普通质控</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_16">
+             <property name="orientation">
+              <enum>Qt::Orientation::Horizontal</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Policy::Preferred</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>80</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="AscendingOrderRadioBtn">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>30</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>正序</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="ReverseOrderRadioBtn">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>30</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>倒序</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_17">
+             <property name="orientation">
+              <enum>Qt::Orientation::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_4">
+           <property name="font">
+            <font>
+             <pointsize>10</pointsize>
+             <italic>true</italic>
+            </font>
+           </property>
+           <property name="text">
+            <string>       支持按时间倒序或正序对当日所有安检通道剩余的全部未质控图像进行质控。</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="verticalSpacer_3">
+           <property name="orientation">
+            <enum>Qt::Orientation::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
        </widget>
       </item>
      </layout>
@@ -1016,6 +1295,18 @@ QCalendarWidget QAbstractItemView {
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ModernDateTimeEdit</class>
+   <extends>QLineEdit</extends>
+   <header>widgets/moderndatetimepicker.h</header>
+  </customwidget>
+  <customwidget>
+   <class>CheckComBoBox</class>
+   <extends>QComboBox</extends>
+   <header>widgets/CheckComBoBox.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="rc.qrc"/>
  </resources>

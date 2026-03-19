@@ -45,6 +45,7 @@ SOURCES += \
     widgets/CollapsiblePanel.cpp \
     widgets/SwitchButton.cpp \
     widgets/flowlayout.cpp \
+    widgets/moderndatetimepicker.cpp \
     widgets/paginationwidget.cpp
 
 HEADERS += \
@@ -68,6 +69,7 @@ HEADERS += \
     widgets/CollapsiblePanel.h \
     widgets/SwitchButton.h \
     widgets/flowlayout.h \
+    widgets/moderndatetimepicker.h \
     widgets/paginationwidget.h
 
 FORMS += \
