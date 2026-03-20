@@ -176,5 +176,7 @@
         <file>Images/tf_ms.png</file>
         <file>Images/clock.png</file>
         <file>Images/src_003.jpg</file>
+        <file>qss/PaginationWidget.qss</file>
     </qresource>
+    <qresource prefix="/style"/>
 </RCC>

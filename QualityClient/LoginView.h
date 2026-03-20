@@ -18,6 +18,9 @@ public:
 public:
     void reset();
 
+private:
+    QString encryptPassword(const QString &password);
+
 signals:
     void loginSuccess(const QString &userName);
     void backToLogin();

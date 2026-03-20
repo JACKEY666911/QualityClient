@@ -21,10 +21,15 @@ struct HttpResponse {
     int status = -1;
     QByteArray body;
     QJsonDocument json;
+    QJsonValue data;
     bool ok = false;
     QString error;
     bool isTimeout = false;
     // 便捷方法
+
+    QJsonObject dataObject() const { return data.toObject(); }
+    QJsonArray dataArray() const { return data.toArray(); }
+
     QJsonObject object() const { return json.object(); }
     QJsonArray array() const { return json.array(); }
     template<typename T>

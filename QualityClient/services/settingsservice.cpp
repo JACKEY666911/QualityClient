@@ -22,6 +22,12 @@ SettingsService::SettingsService(QObject *parent) : QObject(parent), m_settings(
         configDir.mkpath(".");
     }
     qDebug() << "Settings INI file path:" << m_settings.fileName();
+
+    // Ensure required defaults exist in settings.ini
+    if (!m_settings.contains(QStringLiteral("baseUrl"))) {
+        m_settings.setValue(QStringLiteral("baseUrl"), QStringLiteral("http://192.168.1.65:17301/"));
+        m_settings.sync();
+    }
 }
 
 SettingsService &SettingsService::instance() {

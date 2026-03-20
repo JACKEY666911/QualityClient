@@ -6,24 +6,24 @@ LayerViewModel::LayerViewModel(QObject *parent)
       m_isModify(false),
       m_qualityResult(-1),
       m_analysisDuration(-1),
-      m_selectedXrayItem(nullptr),
+      m_selectedIndex(-1),
       m_currentStartIndex(0)
 {
 }
 
-QList<XrayImage*> LayerViewModel::xrayImageLayerItems() const
+QList<XrayImage> LayerViewModel::xrayImageLayerItems() const
 {
     return m_xrayImageLayerItems;
 }
 
-void LayerViewModel::setXrayImageLayerItems(const QList<XrayImage*> &items)
+void LayerViewModel::setXrayImageLayerItems(const QList<XrayImage> &items)
 {
     m_xrayImageLayerItems = items;
     m_currentStartIndex = 0;
     updateDisplayedItems();
 }
 
-QList<XrayImage*> LayerViewModel::displayedLayerItems() const
+QList<XrayImage> LayerViewModel::displayedLayerItems() const
 {
     return m_displayedLayerItems;
 }
@@ -73,18 +73,21 @@ void LayerViewModel::setAnalysisDuration(qint64 value)
     emit durationChanged();
 }
 
-XrayImage *LayerViewModel::selectedXrayItem() const
+const XrayImage *LayerViewModel::selectedXrayItem() const
 {
-    return m_selectedXrayItem;
+    if (m_selectedIndex < 0 || m_selectedIndex >= m_xrayImageLayerItems.size()) {
+        return nullptr;
+    }
+    return &m_xrayImageLayerItems[m_selectedIndex];
 }
 
-void LayerViewModel::setSelectedXrayItem(XrayImage *item)
+void LayerViewModel::setSelectedXrayItem(int index)
 {
-    if (m_selectedXrayItem == item) {
+    if (m_selectedIndex == index) {
         return;
     }
-    m_selectedXrayItem = item;
-    emit selectionChanged(item);
+    m_selectedIndex = index;
+    emit selectionChanged(index);
 }
 
 int LayerViewModel::currentStartIndex() const
@@ -129,15 +132,15 @@ void LayerViewModel::nextPage()
     updateDisplayedItems();
 }
 
-void LayerViewModel::selectLayerItem(XrayImage *item)
+void LayerViewModel::selectLayerItem(int index)
 {
-    if (!item || m_selectedXrayItem == item) {
+    if (index < 0 || index >= m_xrayImageLayerItems.size()) {
         return;
     }
-    for (XrayImage *img : m_xrayImageLayerItems) {
-        img->setSelected(img == item);
+    for (int i = 0; i < m_xrayImageLayerItems.size(); ++i) {
+        m_xrayImageLayerItems[i].setSelected(i == index);
     }
-    setSelectedXrayItem(item);
+    setSelectedXrayItem(index);
 }
 
 void LayerViewModel::selectDisplayedIndex(int index)
@@ -145,38 +148,45 @@ void LayerViewModel::selectDisplayedIndex(int index)
     if (index < 0 || index >= m_displayedLayerItems.size()) {
         return;
     }
-    selectLayerItem(m_displayedLayerItems.at(index));
+    const int absoluteIndex = m_currentStartIndex + index;
+    if (absoluteIndex < 0 || absoluteIndex >= m_xrayImageLayerItems.size()) {
+        return;
+    }
+    for (int i = 0; i < m_xrayImageLayerItems.size(); ++i) {
+        m_xrayImageLayerItems[i].setSelected(i == absoluteIndex);
+    }
+    setSelectedXrayItem(absoluteIndex);
 }
 
 void LayerViewModel::selectFirstItem()
 {
     if (!m_displayedLayerItems.isEmpty()) {
-        selectLayerItem(m_displayedLayerItems.first());
+        selectDisplayedIndex(0);
     }
 }
 
 void LayerViewModel::clearSelect()
 {
-    m_selectedXrayItem = nullptr;
-    for (XrayImage *img : m_xrayImageLayerItems) {
-        img->setSelected(false);
+    m_selectedIndex = -1;
+    for (int i = 0; i < m_xrayImageLayerItems.size(); ++i) {
+        m_xrayImageLayerItems[i].setSelected(false);
     }
     m_isModify = false;
-    emit selectionChanged(nullptr);
+    emit selectionChanged(-1);
 }
 
 void LayerViewModel::clearXrayImageLayerItems()
 {
     m_xrayImageLayerItems.clear();
     m_displayedLayerItems.clear();
-    m_selectedXrayItem = nullptr;
+    m_selectedIndex = -1;
     m_analysisDuration = -1;
     m_isModify = false;
     m_topViewImage = QPixmap();
     emit displayedItemsChanged();
     emit topViewImageChanged();
     emit durationChanged();
-    emit selectionChanged(nullptr);
+    emit selectionChanged(-1);
     notifyButtons();
 }
 

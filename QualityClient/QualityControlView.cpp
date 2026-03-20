@@ -1,25 +1,21 @@
-﻿#include "QualityControlView.h"
-#include "widgets/AnnotationGraphicsView.h"
-#include "widgets/CollapsiblePanel.h"
-#include "widgets/LayerViewWidget.h"
-#include "widgets/SwitchButton.h"
-#include "widgets/ThumbnailWidget.h"
-#include "Models/XrayImage.h"
+#include "QualityControlView.h"
 
-#include <QFrame>
+#include "widgets/SwitchButton.h"
+#include "widgets/LayerViewWidget.h"
+#include "Models/XrayImage.h"
+#include "services/qualitycontrolservice.h"
+#include "services/qualitycontrolcontroller.h"
+
 #include <QHBoxLayout>
 #include <QLabel>
-#include <QEvent>
 #include <QPushButton>
-#include <QPixmap>
-#include <QStackedWidget>
 #include <QTimer>
-#include <QVBoxLayout>
-#include <QStringLiteral>
+#include <QDateTime>
+#include <QFont>
+
 QualityControlView::QualityControlView(QWidget *parent)
-    : QWidget(parent)
+    : QualityControlBaseView(parent)
     , m_taskCountLabel(nullptr)
-    , m_countdownLabel(nullptr)
     , m_durationTitleLabel(nullptr)
     , m_durationDot(nullptr)
     , m_durationValueLabel(nullptr)
@@ -28,35 +24,40 @@ QualityControlView::QualityControlView(QWidget *parent)
     , m_statsButton(nullptr)
     , m_historyButton(nullptr)
     , m_switchModeButton(nullptr)
-    , m_mainView(nullptr)
-    , m_auxView(nullptr)
-    , m_activeView(nullptr)
-    , m_brandStack(nullptr)
-    , m_thumbnail(nullptr)
-    , m_middleArea(nullptr)
-    , m_overlayPanel(nullptr)
-    , m_layerView(nullptr)
     , m_testIndex(0)
     , m_durationTimer(nullptr)
     , m_elapsedSeconds(0)
+    , m_service(new QualityControlService(this))
+    , m_controller(new QualityControlController(this))
 {
-    QVBoxLayout *rootLayout = new QVBoxLayout;
-    rootLayout->setContentsMargins(0, 0, 0, 0);
-    rootLayout->setSpacing(0);
-
-    rootLayout->addWidget(buildTopBar());
-    rootLayout->addWidget(buildMiddleArea());
-    rootLayout->addWidget(buildBottomBar());
-
-    setLayout(rootLayout);
-    setMinimumSize(1920, 1080);
-    setMaximumSize(1920, 1080);
-
+    initializeLayout();
     m_testImages << QStringLiteral(":/Images/yisuoTest.png")
                  << QStringLiteral(":/Images/yisuoTest1.png")
                  << QStringLiteral(":/Images/yisuoTest2.png")
                  << QStringLiteral(":/Images/yisuoTest3.png");
+    initTestLayerItems();
     loadNextImage();
+
+    connect(m_startCheckButton, &QPushButton::clicked, m_service, &QualityControlService::startCheck);
+    connect(m_passButton, &QPushButton::clicked, m_service, &QualityControlService::pass);
+    connect(m_detailButton, &QPushButton::clicked, m_service, &QualityControlService::openPersonDetail);
+    connect(this, &QualityControlBaseView::xrayTypeToggled, m_service, &QualityControlService::switchXrayType);
+
+    connect(m_service, &QualityControlService::availableTypesReceived, m_controller, &QualityControlController::setAvailableTypes);
+    connect(m_service, &QualityControlService::mainImageReceived, m_controller, &QualityControlController::setMainImage);
+    connect(m_service, &QualityControlService::auxImageReceived, m_controller, &QualityControlController::setAuxImage);
+    connect(m_service, &QualityControlService::judgeResultReceived, m_controller, &QualityControlController::setJudgeResultText);
+    connect(m_service, &QualityControlService::freshnessReceived, m_controller, &QualityControlController::setFreshnessText);
+    connect(m_service, &QualityControlService::channelReceived, m_controller, &QualityControlController::setChannelText);
+    connect(m_service, &QualityControlService::timeTextReceived, m_controller, &QualityControlController::setTimeText);
+
+    connect(m_controller, &QualityControlController::availableTypesChanged, this, &QualityControlBaseView::setAvailableXrayTypes);
+    connect(m_controller, &QualityControlController::mainImageChanged, this, &QualityControlBaseView::setMainImage);
+    connect(m_controller, &QualityControlController::auxImageChanged, this, &QualityControlBaseView::setAuxImage);
+    connect(m_controller, &QualityControlController::judgeResultChanged, this, &QualityControlBaseView::setJudgeResultText);
+    connect(m_controller, &QualityControlController::freshnessChanged, this, &QualityControlBaseView::setFreshnessText);
+    connect(m_controller, &QualityControlController::channelChanged, this, &QualityControlBaseView::setChannelText);
+    connect(m_controller, &QualityControlController::timeTextChanged, this, &QualityControlBaseView::setTimeText);
 }
 
 void QualityControlView::setUserName(const QString &userName)
@@ -80,96 +81,14 @@ void QualityControlView::setCountdownText(const QString &text)
     }
 }
 
-void QualityControlView::setBrand(const QString &brandKey)
-{
-    if (!m_brandStack) {
-        return;
-    }
-    if (brandKey == QStringLiteral("yisuo")) {
-        m_brandStack->setCurrentIndex(1);
-    } else {
-        m_brandStack->setCurrentIndex(0);
-    }
-}
-
 void QualityControlView::setMainImage(const QPixmap &pixmap)
 {
-    if (m_mainView) {
-        m_mainView->setImage(pixmap);
-    }
-    if (m_thumbnail) {
-        m_thumbnail->setImage(pixmap);
-    }
-    if (m_layerView) {
-        m_layerView->setTopImage(pixmap);
-    }
+    QualityControlBaseView::setMainImage(pixmap);
 }
 
 void QualityControlView::setAuxImage(const QPixmap &pixmap)
 {
-    if (m_auxView) {
-        m_auxView->setImage(pixmap);
-    }
-    if (m_thumbnail && m_activeView == m_auxView) {
-        m_thumbnail->setImage(pixmap);
-    }
-}
-
-void QualityControlView::loadNextImage()
-{
-    if (m_testImages.isEmpty()) {
-        return;
-    }
-    const QString path = m_testImages.at(m_testIndex % m_testImages.size());
-    m_testIndex++;
-
-    QPixmap pix(path);
-    setMainImage(pix);
-    setAuxImage(pix);
-
-    if (m_mainView) {
-        m_mainView->clearAnnotations();
-        m_mainView->resetZoom();
-    }
-    if (m_auxView) {
-        m_auxView->clearAnnotations();
-        m_auxView->resetZoom();
-    }
-}
-
-QList<AnnotationGraphicsView::AnnotationData> QualityControlView::mainAnnotations() const
-{
-    if (!m_mainView) {
-        return {};
-    }
-    return m_mainView->annotations();
-}
-
-QList<AnnotationGraphicsView::AnnotationData> QualityControlView::auxAnnotations() const
-{
-    if (!m_auxView) {
-        return {};
-    }
-    return m_auxView->annotations();
-}
-
-
-void QualityControlView::handleViewActivated(AnnotationGraphicsView *view)
-{
-    if (m_activeView == view) {
-        return;
-    }
-    if (m_activeView) {
-        m_activeView->setActive(false);
-    }
-    m_activeView = view;
-    if (m_activeView) {
-        m_activeView->setActive(true);
-    }
-    if (m_thumbnail && m_activeView && m_activeView->hasImage()) {
-        m_thumbnail->setImage(m_activeView->image());
-        m_activeView->refreshViewRect();
-    }
+    QualityControlBaseView::setAuxImage(pixmap);
 }
 
 void QualityControlView::handlePauseToggled(bool checked)
@@ -197,14 +116,9 @@ void QualityControlView::handleDurationTick()
     if (m_durationValueLabel) {
         m_durationValueLabel->setText(text);
     }
-}
-
-bool QualityControlView::eventFilter(QObject *watched, QEvent *event)
-{
-    if (watched == m_middleArea && event->type() == QEvent::Resize) {
-        updateOverlayGeometry();
+    if (m_timeValueLabel) {
+        m_timeValueLabel->setText(QDateTime::currentDateTime().toString(QStringLiteral("yyyy-MM-dd HH:mm:ss")));
     }
-    return QWidget::eventFilter(watched, event);
 }
 
 QWidget *QualityControlView::buildTopBar()
@@ -282,64 +196,45 @@ QWidget *QualityControlView::buildTopBar()
     return topBar;
 }
 
-QWidget *QualityControlView::buildMiddleArea()
+void QualityControlView::loadNextImage()
 {
-    QWidget *middle = new QWidget(this);
-    m_middleArea = middle;
-    middle->setMinimumHeight(898);
-    middle->setMaximumHeight(898);
-    middle->setStyleSheet(QStringLiteral("background:#F2F2F2;"));
-    middle->installEventFilter(this);
+    if (m_testImages.isEmpty()) {
+        return;
+    }
+    const QString path = m_testImages.at(m_testIndex % m_testImages.size());
+    m_testIndex++;
 
-    QHBoxLayout *layout = new QHBoxLayout(middle);
-    layout->setContentsMargins(10, 10, 10, 10);
-    layout->setSpacing(10);
+    QPixmap pix(path);
+    setMainImage(pix);
+    setAuxImage(pix);
 
-    m_mainView = new AnnotationGraphicsView(middle);
-    m_auxView = new AnnotationGraphicsView(middle);
+    if (m_mainView) {
+        m_mainView->clearAnnotations();
+        m_mainView->resetZoom();
+    }
+    if (m_auxView) {
+        m_auxView->clearAnnotations();
+        m_auxView->resetZoom();
+    }
+}
 
-    connect(m_mainView, &AnnotationGraphicsView::activated, this, &QualityControlView::handleViewActivated);
-    connect(m_auxView, &AnnotationGraphicsView::activated, this, &QualityControlView::handleViewActivated);
-
-    layout->addWidget(m_mainView);
-    layout->addWidget(m_auxView);
-
-    handleViewActivated(m_mainView);
-
-    m_overlayPanel = new CollapsiblePanel(middle);
-    m_overlayPanel->setStyleSheet(QStringLiteral(
-        "QWidget#collapsiblePanel{background:#d7d7d7;border:1px solid #bdbdbd;border-radius:4px;}"
-        "QPushButton#collapsibleToggle{background:#1e8caa;color:white;border:none;}"
-        "QPushButton#collapsibleToggle:hover{background:#2b9bbc;}"
-    ));
-
-    m_layerView = new LayerViewWidget(m_overlayPanel);
-    m_overlayPanel->setContentWidget(m_layerView);
-
-    connect(m_layerView, &LayerViewWidget::xrayItemSelected, this, [this](XrayImage *item) {
-        if (!item) {
-            return;
-        }
-        if (!item->mainXrayImageUrl().isEmpty()) {
-            setMainImage(QPixmap(item->mainXrayImageUrl()));
-        }
-        if (!item->assistXrayImageUrl().isEmpty()) {
-            setAuxImage(QPixmap(item->assistXrayImageUrl()));
-        }
-    });
-
-    QList<XrayImage*> items;
+void QualityControlView::initTestLayerItems()
+{
+    if (!m_layerView) {
+        return;
+    }
+    QList<XrayImage> items;
     auto makeItem = [this](const QString &mainPath, const QString &assistPath, const QString &pbType, qint64 viewCount, bool selected) {
-        XrayImage *img = new XrayImage(m_layerView);
-        img->setMainXrayImageUrl(mainPath);
-        img->setAssistXrayImageUrl(assistPath);
+        XrayImage img;
+        img.setMainXrayImageUrl(mainPath);
+        img.setAssistXrayImageUrl(assistPath);
         if (!pbType.isEmpty()) {
-            img->setPbEnhancedType(pbType);
+            img.setPbEnhancedType(pbType);
         }
         if (viewCount > 0) {
-            img->setViewCount(viewCount);
+            img.setViewCount(viewCount);
         }
-        img->setSelected(selected);
+        img.setSelected(selected);
         return img;
     };
 
@@ -354,158 +249,4 @@ QWidget *QualityControlView::buildMiddleArea()
     m_layerView->setPageSize(3);
     m_layerView->setXrayItems(items);
     m_layerView->setDurationText(QStringLiteral("10秒"));
-    connect(m_overlayPanel, &CollapsiblePanel::collapsedChanged, this, [this]() {
-        updateOverlayGeometry();
-    });
-    updateOverlayGeometry();
-    return middle;
-}
-
-QWidget *QualityControlView::buildBottomBar()
-{
-    QWidget *bottom = new QWidget(this);
-    bottom->setMinimumHeight(127);
-    bottom->setMaximumHeight(127);
-    bottom->setStyleSheet(QStringLiteral("background:#ffffff;"));
-
-    QHBoxLayout *layout = new QHBoxLayout(bottom);
-    layout->setContentsMargins(10, 10, 10, 10);
-    layout->setSpacing(15);
-
-    m_thumbnail = new ThumbnailWidget(bottom);
-    m_thumbnail->setFixedSize(180, 100);
-    m_thumbnail->setStyleSheet(QStringLiteral("border:1px solid #c0c0c0;"));
-
-    QWidget *tools = new QWidget(bottom);
-    QHBoxLayout *toolsLayout = new QHBoxLayout(tools);
-    toolsLayout->setContentsMargins(0, 0, 0, 0);
-    toolsLayout->setSpacing(10);
-
-    m_brandStack = new QStackedWidget(tools);
-    QStringList tongfang = {QStringLiteral("ED"), QStringLiteral("GEN"), QStringLiteral("HI"),
-                            QStringLiteral("LOW"), QStringLiteral("OS"), QStringLiteral("MS")};
-    QStringList yisuo = {QStringLiteral("E0"), QStringLiteral("E1"), QStringLiteral("E2"),
-                         QStringLiteral("SC"), QStringLiteral("OC"), QStringLiteral("HD")};
-    m_brandStack->addWidget(buildBrandButtons(tongfang));
-    m_brandStack->addWidget(buildBrandButtons(yisuo));
-    m_brandStack->setCurrentIndex(0);
-
-    QPushButton *resetButton = new QPushButton(QStringLiteral("ESC"), tools);
-    QPushButton *zoomInButton = new QPushButton(QStringLiteral("放大"), tools);
-    QPushButton *zoomOutButton = new QPushButton(QStringLiteral("缩小"), tools);
-    QPushButton *manualToggle = new QPushButton(QStringLiteral("手工标注"), tools);
-    QPushButton *aiToggle = new QPushButton(QStringLiteral("AI标注"), tools);
-    QPushButton *nextButtonA = new QPushButton(QStringLiteral("下一张"), tools);
-    QPushButton *nextButtonB = new QPushButton(QStringLiteral("下一张"), tools);
-    manualToggle->setCheckable(true);
-    aiToggle->setCheckable(true);
-    manualToggle->setChecked(true);
-    aiToggle->setChecked(true);
-
-    connect(resetButton, &QPushButton::clicked, this, [this]() {
-        if (m_activeView) {
-            m_activeView->resetZoom();
-        }
-    });
-    connect(zoomInButton, &QPushButton::clicked, this, [this]() {
-        if (m_activeView) {
-            m_activeView->zoomIn();
-        }
-    });
-    connect(zoomOutButton, &QPushButton::clicked, this, [this]() {
-        if (m_activeView) {
-            m_activeView->zoomOut();
-        }
-    });
-    connect(manualToggle, &QPushButton::toggled, this, [this](bool checked) {
-        if (m_mainView) {
-            m_mainView->setManualVisible(checked);
-        }
-        if (m_auxView) {
-            m_auxView->setManualVisible(checked);
-        }
-    });
-    connect(aiToggle, &QPushButton::toggled, this, [this](bool checked) {
-        if (m_mainView) {
-            m_mainView->setAiVisible(checked);
-        }
-        if (m_auxView) {
-            m_auxView->setAiVisible(checked);
-        }
-    });
-    connect(nextButtonA, &QPushButton::clicked, this, [this]() { loadNextImage(); });
-    connect(nextButtonB, &QPushButton::clicked, this, [this]() { loadNextImage(); });
-
-    toolsLayout->addWidget(m_brandStack);
-    toolsLayout->addWidget(resetButton);
-    toolsLayout->addWidget(zoomInButton);
-    toolsLayout->addWidget(zoomOutButton);
-    toolsLayout->addWidget(manualToggle);
-    toolsLayout->addWidget(aiToggle);
-    toolsLayout->addWidget(nextButtonA);
-    toolsLayout->addWidget(nextButtonB);
-    toolsLayout->addStretch(1);
-
-    layout->addWidget(m_thumbnail);
-    layout->addWidget(tools, 1);
-
-    connect(m_thumbnail, &ThumbnailWidget::clickedAtNormalized, this, [this](qreal xRatio, qreal yRatio) {
-        if (m_activeView && m_activeView->isZoomed()) {
-            m_activeView->centerOnNormalized(xRatio, yRatio);
-        }
-    });
-    auto bindView = [this](AnnotationGraphicsView *view) {
-        connect(view, &AnnotationGraphicsView::viewRectChanged, this, [this, view](const QRectF &rect) {
-            if (m_thumbnail && m_activeView == view) {
-                m_thumbnail->setViewRectNormalized(rect);
-            }
-        });
-    };
-    if (m_mainView) {
-        bindView(m_mainView);
-    }
-    if (m_auxView) {
-        bindView(m_auxView);
-    }
-
-    return bottom;
-}
-
-QWidget *QualityControlView::buildBrandButtons(const QStringList &labels)
-{
-    QWidget *container = new QWidget(this);
-    QHBoxLayout *layout = new QHBoxLayout(container);
-    layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(8);
-
-    for (const QString &label : labels) {
-        QPushButton *btn = new QPushButton(label, container);
-        btn->setFixedSize(60, 32);
-        layout->addWidget(btn);
-    }
-    return container;
-}
-
-void QualityControlView::positionOverlayPanel()
-{
-    if (!m_middleArea || !m_overlayPanel) {
-        return;
-    }
-    m_overlayPanel->adjustSize();
-    const int margin = 0;
-    int x = m_middleArea->width() - m_overlayPanel->width() - margin;
-    int y = margin;
-    if (x < 0) {
-        x = 0;
-    }
-    if (y < 0) {
-        y = 0;
-    }
-    m_overlayPanel->move(x, y);
-    m_overlayPanel->raise();
-}
-
-void QualityControlView::updateOverlayGeometry()
-{
-    positionOverlayPanel();
 }

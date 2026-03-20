@@ -3,13 +3,12 @@
 
 #include <QWidget>
 #include <QPixmap>
+#include "Models/XrayImage.h"
 
 class QLabel;
 class QPushButton;
 class QHBoxLayout;
 class QPixmap;
-class XrayImage;
-
 class LayerViewWidget : public QWidget
 {
     Q_OBJECT
@@ -25,7 +24,7 @@ public:
     void setTopImage(const QPixmap &pixmap);
     void setDurationText(const QString &text);
     void setLayerItems(const QList<LayerItemData> &items);
-    void setXrayItems(const QList<XrayImage*> &items);
+    void setXrayItems(const QList<XrayImage> &items);
     void setPageSize(int size);
     int pageSize() const;
     int currentStartIndex() const;
@@ -38,7 +37,7 @@ signals:
     void layerClicked(int index);
     void selectionChanged(int index);
     void pageChanged(int startIndex);
-    void xrayItemSelected(XrayImage *item);
+    void xrayItemSelected(const XrayImage &item);
 
 private:
     void rebuildLayerCards();
@@ -55,7 +54,7 @@ private:
     QWidget *m_cardsContainer;
     QHBoxLayout *m_cardsLayout;
     QList<LayerItemData> m_layerItems;
-    QList<XrayImage*> m_itemRefs;
+    QList<XrayImage> m_itemRefs;
     QPushButton *m_prevButton;
     QPushButton *m_nextButton;
     int m_pageSize;

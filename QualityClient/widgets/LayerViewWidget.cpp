@@ -292,7 +292,7 @@ void LayerViewWidget::setLayerItems(const QList<LayerItemData> &items)
     rebuildLayerCards();
 }
 
-void LayerViewWidget::setXrayItems(const QList<XrayImage*> &items)
+void LayerViewWidget::setXrayItems(const QList<XrayImage> &items)
 {
     m_layerItems.clear();
     m_itemRefs = items;
@@ -301,12 +301,12 @@ void LayerViewWidget::setXrayItems(const QList<XrayImage*> &items)
     m_selectedIndex = -1;
 
     for (int i = 0; i < items.size(); ++i) {
-        XrayImage *img = items.at(i);
+        const XrayImage &img = items.at(i);
         LayerItemData data;
-        data.name = img ? img->name() : QStringLiteral("--");
-        data.selected = img ? img->isSelected() : false;
-        if (img && !img->mainXrayImageUrl().isEmpty()) {
-            data.image = QPixmap(img->mainXrayImageUrl());
+        data.name = img.name();
+        data.selected = img.isSelected();
+        if (!img.mainXrayImageUrl().isEmpty()) {
+            data.image = QPixmap(img.mainXrayImageUrl());
         }
         m_layerItems.append(data);
         if (data.selected && m_selectedIndex < 0) {
@@ -316,9 +316,6 @@ void LayerViewWidget::setXrayItems(const QList<XrayImage*> &items)
     if (m_selectedIndex < 0 && !m_layerItems.isEmpty()) {
         m_selectedIndex = 0;
         m_layerItems[0].selected = true;
-        if (!m_itemRefs.isEmpty() && m_itemRefs[0]) {
-            m_itemRefs[0]->setSelected(true);
-        }
     }
     rebuildLayerCards();
 }
@@ -405,9 +402,7 @@ void LayerViewWidget::selectIndexInternal(int index)
     }
     if (!m_itemRefs.isEmpty()) {
         for (int i = 0; i < m_itemRefs.size(); ++i) {
-            if (m_itemRefs[i]) {
-                m_itemRefs[i]->setSelected(i == index);
-            }
+            m_itemRefs[i].setSelected(i == index);
         }
     }
     m_selectedIndex = index;

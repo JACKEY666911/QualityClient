@@ -4,8 +4,7 @@
 #include <QObject>
 #include <QList>
 #include <QPixmap>
-
-class XrayImage;
+#include "XrayImage.h"
 
 class LayerViewModel : public QObject
 {
@@ -13,10 +12,10 @@ class LayerViewModel : public QObject
 public:
     explicit LayerViewModel(QObject *parent = nullptr);
 
-    QList<XrayImage*> xrayImageLayerItems() const;
-    void setXrayImageLayerItems(const QList<XrayImage*> &items);
+    QList<XrayImage> xrayImageLayerItems() const;
+    void setXrayImageLayerItems(const QList<XrayImage> &items);
 
-    QList<XrayImage*> displayedLayerItems() const;
+    QList<XrayImage> displayedLayerItems() const;
 
     bool isModify() const;
     void setIsModify(bool value);
@@ -30,8 +29,8 @@ public:
     qint64 analysisDuration() const;
     void setAnalysisDuration(qint64 value);
 
-    XrayImage *selectedXrayItem() const;
-    void setSelectedXrayItem(XrayImage *item);
+    const XrayImage *selectedXrayItem() const;
+    void setSelectedXrayItem(int index);
 
     int currentStartIndex() const;
     void setCurrentStartIndex(int index);
@@ -41,7 +40,7 @@ public:
 
     void prevPage();
     void nextPage();
-    void selectLayerItem(XrayImage *item);
+    void selectLayerItem(int index);
     void selectDisplayedIndex(int index);
     void selectFirstItem();
     void clearSelect();
@@ -50,7 +49,7 @@ public:
 
 signals:
     void displayedItemsChanged();
-    void selectionChanged(XrayImage *item);
+    void selectionChanged(int index);
     void topViewImageChanged();
     void durationChanged();
     void buttonsChanged();
@@ -59,13 +58,13 @@ private:
     int pageSize() const { return 3; }
     void notifyButtons();
 
-    QList<XrayImage*> m_xrayImageLayerItems;
-    QList<XrayImage*> m_displayedLayerItems;
+    QList<XrayImage> m_xrayImageLayerItems;
+    QList<XrayImage> m_displayedLayerItems;
     bool m_isModify;
     QPixmap m_topViewImage;
     int m_qualityResult;
     qint64 m_analysisDuration;
-    XrayImage *m_selectedXrayItem;
+    int m_selectedIndex;
     int m_currentStartIndex;
 };
 

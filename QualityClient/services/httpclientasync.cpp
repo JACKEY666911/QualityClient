@@ -196,12 +196,15 @@ QFuture<HttpResponse> HttpClientAsync::doRequest(const QNetworkRequest& req,
                 HttpResponse resp = makeResponse(reply, bytes);
 
                 // 设置最终结果
-                if (resp.ok) {
+                // if (resp.ok) {
+                //     promise->addResult(std::move(resp));
+                // } else {
+                //     promise->setException(
+                //         HttpException(resp.status, resp.error)
+                //         );
+                // }
+                if (!promise->isCanceled()) {
                     promise->addResult(std::move(resp));
-                } else {
-                    promise->setException(
-                        HttpException(resp.status, resp.error)
-                        );
                 }
                 promise->finish();
                 reply->deleteLater();
@@ -217,42 +220,50 @@ HttpResponse HttpClientAsync::makeResponse(QNetworkReply* reply,
                                            const QByteArray& bytes)
 {
     HttpResponse r;
-    r.body = bytes;                          // 保存原始字节
+    r.body = bytes;
 
-    // 获取 HTTP 状态码（从 QNetworkReply 的属性中）
-    QVariant statusVar = reply->attribute(
-        QNetworkRequest::HttpStatusCodeAttribute
-        );
-    r.status = statusVar.isValid() ? statusVar.toInt() : -1;
-
-    // 尝试解析 JSON（如果有内容）
-    if (!bytes.isEmpty()) {
-        QJsonParseError err;
-        r.json = QJsonDocument::fromJson(bytes, &err);
-        // 即使解析失败，也不报错，保留原始 body
-    }
-
-    // 判断网络层错误（非 HTTP 错误，如连接失败、超时等）
     if (reply->error() != QNetworkReply::NoError) {
         r.ok = false;
-
-        if (reply->error() == QNetworkReply::OperationCanceledError) {
-            // 被取消（通常是超时导致的 abort）
-            r.isTimeout = true;
-            r.error = "Request timeout";
-        } else {
-            // 其他网络错误
-            r.error = reply->errorString();
-        }
+        r.isTimeout = (reply->error() == QNetworkReply::OperationCanceledError);
+        r.error = reply->errorString();
+        // 尝试记录物理状态码供调试
+        r.status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
         return r;
     }
 
-    // 判断 HTTP 状态码（2xx 为成功）
-    r.ok = (r.status >= 200 && r.status < 300);
-    if (!r.ok) {
-        r.error = QString("HTTP error: %1").arg(r.status);
-    }
+    if (!bytes.isEmpty()) {
+        QJsonParseError parseErr;
+        r.json = QJsonDocument::fromJson(bytes, &parseErr);
 
+        if (parseErr.error == QJsonParseError::NoError) {
+            QJsonObject root = r.json.object();
+
+            // 提取固定结构：status, message, data
+            if (root.contains(QStringLiteral("status"))) {
+                // 1. 提取业务状态码
+                r.status = root.value(QStringLiteral("status")).toVariant().toInt();
+                // 2. 提取业务消息
+                r.error = root.value(QStringLiteral("message")).toString();
+                // 3. 提取业务核心数据
+                r.data = root.value(QStringLiteral("data"));
+
+                //只有 status == 200 代表接口正常业务返回
+                r.ok = (r.status == 200);
+            } else {
+                // JSON 结构不对（没有 status 字段）
+                r.ok = false;
+                r.error = QStringLiteral("非法业务报文格式");
+            }
+        } else {
+            // 返回的不是 JSON
+            r.ok = false;
+            r.error = QStringLiteral("无法解析服务器响应数据");
+        }
+    } else {
+        // 空响应
+        r.ok = false;
+        r.error = QStringLiteral("服务器返回空报文");
+    }
     return r;
 }
 

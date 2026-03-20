@@ -45,6 +45,8 @@ public:
     // 重置分页（恢复到第一页）
     void reset();
 
+    void paintEvent(QPaintEvent *event) override;
+
 signals:
     // 分页变更信号（核心：向外传递分页参数）
     void pageChanged(int currentPage, int pageSize);

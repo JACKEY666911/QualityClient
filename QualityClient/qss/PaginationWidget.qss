@@ -1,0 +1,89 @@
+/* 主容器背景 */
+#PaginationWidget {
+    background-color: #ffffff;
+    border-top: 1px solid #ebeef5; /* 常用于表格下方的分割线 */
+    padding: 5px;
+}
+
+/* 文字标签样式 */
+QLabel#TotalLabel, QLabel#PageInfoLabel, #PaginationWidget QLabel {
+    color: #606266;
+    font-family: "Microsoft YaHei";
+    font-size: 13px;
+}
+
+/* 分页导航按钮通用样式 */
+QPushButton[pbtn="nav"], QPushButton[pbtn="jump"] {
+    border: 1px solid #dcdfe6;
+    background-color: #ffffff;
+    color: #606266;
+    border-radius: 4px;
+    padding: 5px 12px;
+    font-size: 13px;
+    min-width: 40px;
+}
+
+/* 悬停状态 */
+QPushButton[pbtn="nav"]:hover, QPushButton[pbtn="jump"]:hover {
+    color: #409eff;
+    border-color: #c6e2ff;
+    background-color: #ecf5ff;
+}
+
+/* 按下状态 */
+QPushButton[pbtn="nav"]:pressed {
+    background-color: #d9ecff;
+}
+
+/* 禁用状态（关键：首页/上一页不可用时的变灰逻辑） */
+QPushButton:disabled {
+    color: #c0c4cc;
+    cursor: not_allowed;
+    background-color: #f5f7fa;
+    border-color: #ebeef5;
+}
+
+/* 特殊突出“跳转”按钮 */
+QPushButton[pbtn="jump"] {
+    background-color: #409eff;
+    color: white;
+    border: none;
+    font-weight: bold;
+}
+QPushButton[pbtn="jump"]:hover {
+    background-color: #66b1ff;
+    color: white;
+}
+QPushButton[pbtn="jump"]:disabled {
+    background-color: #a0cfff;
+}
+
+/* 页码输入框样式 */
+QLineEdit#PageJumpEdit {
+    border: 1px solid #dcdfe6;
+    border-radius: 4px;
+    padding: 3px;
+    color: #606266;
+    selection-background-color: #409eff;
+}
+QLineEdit#PageJumpEdit:focus {
+    border-color: #409eff;
+}
+
+/* 每页条数下拉框样式 */
+QComboBox#PageSizeCombo {
+    border: 1px solid #dcdfe6;
+    border-radius: 4px;
+    padding: 2px 5px;
+    min-width: 100px;
+    color: #606266;
+}
+QComboBox#PageSizeCombo:hover {
+    border-color: #c0c4cc;
+}
+QComboBox#PageSizeCombo::drop-down {
+    border: none;
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    width: 20px;
+}

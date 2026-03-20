@@ -4,12 +4,21 @@
 #include <QObject>
 #include <QString>
 #include <QList>
+#include <QJsonObject>
+#include <QMetaType>
 
-class XrayImage : public QObject
+class XrayImage
 {
-    Q_OBJECT
+    Q_GADGET
+    Q_PROPERTY(QString fullXrayImageUrl MEMBER m_fullXrayImageUrl)
+    Q_PROPERTY(QString mainXrayImageUrl MEMBER m_mainXrayImageUrl)
+    Q_PROPERTY(QString assistXrayImageUrl MEMBER m_assistXrayImageUrl)
+    Q_PROPERTY(QVariant qualityResult MEMBER m_qualityResult)
+    Q_PROPERTY(QString pbEnhancedType MEMBER m_pbEnhancedType)
+    Q_PROPERTY(QList<int> enhancedType MEMBER m_enhancedType)
+    Q_PROPERTY(QVariant viewCount MEMBER m_viewCount)
 public:
-    explicit XrayImage(QObject *parent = nullptr);
+    XrayImage();
 
     QString fullXrayImageUrl() const;
     void setFullXrayImageUrl(const QString &url);
@@ -40,10 +49,7 @@ public:
     QString checkCountText() const;
     void setCheckCountText(const QString &text);
 
-signals:
-    void dataChanged();
-    void selectionChanged(bool selected);
-    void nameChanged(const QString &name);
+    static XrayImage fromJson(const QJsonObject &obj);
 
 private:
     void updateNameFromEnhancedType();
@@ -53,13 +59,15 @@ private:
     QString m_fullXrayImageUrl;
     QString m_mainXrayImageUrl;
     QString m_assistXrayImageUrl;
-    int m_qualityResult;
+    QVariant m_qualityResult;
     QString m_name;
     QString m_pbEnhancedType;
     QList<int> m_enhancedType;
     bool m_isSelected;
-    qint64 m_viewCount;
+    QVariant m_viewCount;
     QString m_checkCountText;
 };
+
+Q_DECLARE_METATYPE(XrayImage)
 
 #endif // XRAYIMAGE_H

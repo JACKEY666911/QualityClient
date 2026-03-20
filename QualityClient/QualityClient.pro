@@ -25,11 +25,16 @@ message("dadadddeeq:\n$$QMAKE_LFLAGS")
 INCLUDEPATH += $$PWD/libraries
 SOURCES += \
     Models/LayerViewModel.cpp \
+    Models/ApiRequests.cpp \
+    Models/JsonHelper.cpp \
+    Models/ImageDistributeInfo.cpp \
     Models/XrayImage.cpp \
     GradientLabel.cpp \
     LoginView.cpp \
     MainView.cpp \
     MixModeSelectView.cpp \
+    QualityControlBaseView.cpp \
+    QualityControlHistoryView.cpp \
     QualityControlView.cpp \
     main.cpp \
     MainWindow.cpp \
@@ -37,8 +42,15 @@ SOURCES += \
     services/httpclientasync.cpp \
     services/messagequeue.cpp \
     services/settingsservice.cpp \
+    services/qualitycontrolshortcutmanager.cpp \
+    services/apiservice.cpp \
+    services/qualitycontrolcontroller.cpp \
+    services/qualitycontrolservicebase.cpp \
+    services/qualitycontrolservice.cpp \
+    services/qualitycontrolhistoryservice.cpp \
     widgets/AnnotationGraphicsView.cpp \
     widgets/ThumbnailWidget.cpp \
+    widgets/XrayImageButton.cpp \
     widgets/CheckBoxDelegate.cpp \
     widgets/CheckComBoBox.cpp \
     widgets/LayerViewWidget.cpp \
@@ -50,19 +62,32 @@ SOURCES += \
 
 HEADERS += \
     Models/LayerViewModel.h \
+    Models/JsonHelper.h \
+    Models/ImageDistributeInfo.h \
+    Models/ApiRequests.h \
+    Models/XImageType.h \
     Models/XrayImage.h \
     GradientLabel.h \
     LoginView.h \
     MainView.h \
     MainWindow.h \
     MixModeSelectView.h \
+    QualityControlBaseView.h \
+    QualityControlHistoryView.h \
     QualityControlView.h \
     services/httpclient.h \
     services/httpclientasync.h \
     services/messagequeue.h \
     services/settingsservice.h \
+    services/qualitycontrolshortcutmanager.h \
+    services/apiservice.h \
+    services/qualitycontrolcontroller.h \
+    services/qualitycontrolservicebase.h \
+    services/qualitycontrolservice.h \
+    services/qualitycontrolhistoryservice.h \
     widgets/AnnotationGraphicsView.h \
     widgets/ThumbnailWidget.h \
+    widgets/XrayImageButton.h \
     widgets/CheckBoxDelegate.h \
     widgets/CheckComBoBox.h \
     widgets/LayerViewWidget.h \
@@ -81,7 +106,7 @@ FORMS += \
 include(libraries/spdlog/spdlog.pri)
 include(libraries/argon2/argon2.pri)
 include(libraries/singleapplication/singleapplication.pri)
-
+include(libraries/qhotkey/qhotkey.pri)
 
 
 # Default rules for deployment.
@@ -91,4 +116,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 RESOURCES += \
     rc.qrc
+
+DISTFILES +=
 

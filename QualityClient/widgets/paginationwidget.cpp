@@ -7,11 +7,21 @@
 #include <QIntValidator>
 #include <QMessageBox>
 #include <QDebug>
+#include <QTimer>
+#include <QFile>
+#include <QPainter>
 
 PaginationWidget::PaginationWidget(QWidget *parent)
     : QWidget(parent)
 {
     initUI();
+    QFile file(":/qss/PaginationWidget.qss");
+    if(file.open(QFile::ReadOnly))
+    {
+        QString styleSheet = QLatin1String(file.readAll());
+        this->setStyleSheet(styleSheet);
+        file.close();
+    }
 }
 
 PaginationWidget::~PaginationWidget() = default;
@@ -84,6 +94,10 @@ void PaginationWidget::setCurrentPage(int page)
     updatePageInfo();
     emit currentPageChanged(targetPage);
     emit pageChanged(targetPage, m_pageSize);
+
+    this->setEnabled(false);
+    QTimer::singleShot(300, this, [this](){ this->setEnabled(true); });
+
 }
 
 void PaginationWidget::setPageSizeOptions(const QList<int> &options)
@@ -110,6 +124,16 @@ void PaginationWidget::reset()
 {
     setCurrentPage(1);
     setPageSize(m_pageSizeOptions.first());
+}
+
+void PaginationWidget::paintEvent(QPaintEvent *event)
+{
+    QStyleOption opt;
+    opt.initFrom(this);
+    QPainter p(this);
+    style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
+
+    QWidget::paintEvent(event);
 }
 
 // ====== 内部交互处理 ======
@@ -155,6 +179,20 @@ void PaginationWidget::onPageSizeChanged(int index)
 // ====== UI初始化与状态更新 ======
 void PaginationWidget::initUI()
 {
+
+    this->setObjectName("PaginationWidget");
+    m_totalLabel->setObjectName("TotalLabel");
+    m_pageInfoLabel->setObjectName("PageInfoLabel");
+    m_pageEdit->setObjectName("PageJumpEdit");
+    m_pageSizeCombo->setObjectName("PageSizeCombo");
+
+    // 给所有分页按钮统一设置一个 Property，方便批量写样式
+    m_firstPageBtn->setProperty("pbtn", "nav");
+    m_prevPageBtn->setProperty("pbtn", "nav");
+    m_nextPageBtn->setProperty("pbtn", "nav");
+    m_lastPageBtn->setProperty("pbtn", "nav");
+    m_jumpBtn->setProperty("pbtn", "jump");
+
     // 主布局：水平布局，间距10px，边距10px
     QHBoxLayout *mainLayout = new QHBoxLayout(this);
     mainLayout->setContentsMargins(10, 5, 10, 5);
@@ -232,8 +270,10 @@ void PaginationWidget::updateWidgetState()
     m_prevPageBtn->setEnabled(canPrev);
     m_nextPageBtn->setEnabled(canNext);
     m_lastPageBtn->setEnabled(canNext);
+
     m_jumpBtn->setEnabled(hasData);
     m_pageEdit->setEnabled(hasData);
+
     m_pageSizeCombo->setEnabled(hasData);
 }
 
