@@ -25,6 +25,7 @@ message("dadadddeeq:\n$$QMAKE_LFLAGS")
 INCLUDEPATH += $$PWD/libraries
 SOURCES += \
     Models/LayerViewModel.cpp \
+    logging/logcategories.cpp \
     Models/ApiRequests.cpp \
     Models/JsonHelper.cpp \
     Models/ImageDistributeInfo.cpp \
@@ -38,16 +39,19 @@ SOURCES += \
     QualityControlView.cpp \
     main.cpp \
     MainWindow.cpp \
+    personbaggageview.cpp \
     services/httpclient.cpp \
     services/httpclientasync.cpp \
+    services/imageprovider.cpp \
     services/messagequeue.cpp \
     services/settingsservice.cpp \
     services/qualitycontrolshortcutmanager.cpp \
     services/apiservice.cpp \
-    services/qualitycontrolcontroller.cpp \
     services/qualitycontrolservicebase.cpp \
     services/qualitycontrolservice.cpp \
     services/qualitycontrolhistoryservice.cpp \
+    untils/spdlogwrapper.cpp \
+    untils/timecounter.cpp \
     widgets/AnnotationGraphicsView.cpp \
     widgets/ThumbnailWidget.cpp \
     widgets/XrayImageButton.cpp \
@@ -57,11 +61,17 @@ SOURCES += \
     widgets/CollapsiblePanel.cpp \
     widgets/SwitchButton.cpp \
     widgets/flowlayout.cpp \
+    dialogs/appmessagedialog.cpp \
     widgets/moderndatetimepicker.cpp \
-    widgets/paginationwidget.cpp
+    widgets/paginationwidget.cpp \
+    dialogs/toastnotification.cpp \
+    widgets/qualitycarddelegate.cpp
 
 HEADERS += \
+    Models/GlobalEnums.h \
     Models/LayerViewModel.h \
+    Models/QueryInfo.h \
+    logging/logcategories.h \
     Models/JsonHelper.h \
     Models/ImageDistributeInfo.h \
     Models/ApiRequests.h \
@@ -75,16 +85,19 @@ HEADERS += \
     QualityControlBaseView.h \
     QualityControlHistoryView.h \
     QualityControlView.h \
+    personbaggageview.h \
     services/httpclient.h \
     services/httpclientasync.h \
+    services/imageprovider.h \
     services/messagequeue.h \
     services/settingsservice.h \
     services/qualitycontrolshortcutmanager.h \
     services/apiservice.h \
-    services/qualitycontrolcontroller.h \
     services/qualitycontrolservicebase.h \
     services/qualitycontrolservice.h \
     services/qualitycontrolhistoryservice.h \
+    untils/spdlogwrapper.h \
+    untils/timecounter.h \
     widgets/AnnotationGraphicsView.h \
     widgets/ThumbnailWidget.h \
     widgets/XrayImageButton.h \
@@ -94,14 +107,18 @@ HEADERS += \
     widgets/CollapsiblePanel.h \
     widgets/SwitchButton.h \
     widgets/flowlayout.h \
+    dialogs/appmessagedialog.h \
     widgets/moderndatetimepicker.h \
-    widgets/paginationwidget.h
+    widgets/paginationwidget.h \
+    dialogs/toastnotification.h \
+    widgets/qualitycarddelegate.h
 
 FORMS += \
     LoginView.ui \
     MainView.ui \
     MainWindow.ui \
-    MixModeSelectView.ui
+    MixModeSelectView.ui \
+    personbaggageview.ui
 
 include(libraries/spdlog/spdlog.pri)
 include(libraries/argon2/argon2.pri)

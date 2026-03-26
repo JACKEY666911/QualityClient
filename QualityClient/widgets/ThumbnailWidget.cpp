@@ -7,7 +7,7 @@
 ThumbnailWidget::ThumbnailWidget(QWidget *parent)
     : QWidget(parent)
 {
-    setMinimumSize(160, 90);
+    setMinimumSize(150, 90);
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 }
 

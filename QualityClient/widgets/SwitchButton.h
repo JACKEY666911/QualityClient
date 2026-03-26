@@ -45,6 +45,9 @@ public:
 
     QSize sizeHint() const override;
 
+    void setSwitchChecked(bool checked);
+    void toggle();
+
 protected:
     void paintEvent(QPaintEvent *event) override;
 

@@ -4,6 +4,8 @@
 #include <QHash>
 #include <QSet>
 
+#include "Models/GlobalEnums.h"
+
 class QWidget;
 class QShortcut;
 class QAbstractButton;
@@ -21,15 +23,13 @@ public:
                    QAbstractButton *passButton,
                    QAbstractButton *detailButton);
 
-    void setBrandIsYisuo(bool isYisuo);
+    void setServerType(ServerType serverType);
     void setEnabled(bool enabled);
     void reload();
 
 private:
     void setupShortcuts();
     void refreshBrandShortcuts();
-    void ensureShortcutDefaults(SettingsService &settings) const;
-    QString readShortcut(SettingsService &settings, const QString &key, const QString &fallback) const;
 
     QWidget *m_scope;
     QHash<int, QAbstractButton*> m_typeButtons;
@@ -44,6 +44,6 @@ private:
     QShortcut *m_detailShortcut;
     QHash<int, QShortcut*> m_typeShortcuts;
 
-    bool m_isYisuoBrand;
+    ServerType m_serverType;
     bool m_enabled;
 };

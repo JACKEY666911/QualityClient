@@ -9,9 +9,11 @@
 
 #include "Models/XrayImage.h"
 
+
 struct ImageDistributeInfo
 {
     Q_GADGET
+public:
     Q_PROPERTY(QString id MEMBER id)
     Q_PROPERTY(int type MEMBER type)
     Q_PROPERTY(QString channelNo MEMBER channelNo)
@@ -35,7 +37,7 @@ struct ImageDistributeInfo
     Q_PROPERTY(QVariant tagResult MEMBER tagResult)
     Q_PROPERTY(QString freshness MEMBER freshness)
     Q_PROPERTY(QVariant viewDuration MEMBER viewDuration)
-    Q_PROPERTY(QVariant reExtractStatus MEMBER reExtractStatus)
+    Q_PROPERTY(int reExtractStatus MEMBER reExtractStatus)
 
     QString id;
     int type = -1;
@@ -62,7 +64,7 @@ struct ImageDistributeInfo
     QVariant tagResult;
     QString freshness;
     QVariant viewDuration;
-    QVariant reExtractStatus;
+    int reExtractStatus;
 
     static ImageDistributeInfo fromJson(const QJsonObject &obj);
 };

@@ -2,17 +2,19 @@
 #define QUALITYCONTROLHISTORYVIEW_H
 
 #include "QualityControlBaseView.h"
+#include "Models/ImageDistributeInfo.h"
 
 class QPushButton;
 class QLabel;
 class QualityControlHistoryService;
-class QualityControlController;
 
 class QualityControlHistoryView : public QualityControlBaseView
 {
     Q_OBJECT
 public:
     explicit QualityControlHistoryView(QWidget *parent = nullptr);
+    void setImageDistributeInfo(const ImageDistributeInfo &info);
+    void clearImageDistributeInfo();
 
 signals:
     void requestBack();
@@ -22,8 +24,8 @@ private:
 
     QPushButton *m_backButton;
     QLabel *m_titleLabel;
+    ImageDistributeInfo m_currentDistributeInfo;
     QualityControlHistoryService *m_service;
-    QualityControlController *m_controller;
 };
 
 #endif // QUALITYCONTROLHISTORYVIEW_H

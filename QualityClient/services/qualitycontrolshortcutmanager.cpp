@@ -4,6 +4,7 @@
 #include <QKeySequence>
 #include <QAbstractButton>
 #include <QWidget>
+#include <spdlog/spdlog.h>
 
 #include "services/settingsservice.h"
 #include "Models/XImageType.h"
@@ -19,7 +20,7 @@ QualityControlShortcutManager::QualityControlShortcutManager(QWidget *scope, QOb
     , m_startShortcut(nullptr)
     , m_passShortcut(nullptr)
     , m_detailShortcut(nullptr)
-    , m_isYisuoBrand(false)
+    , m_serverType(ServerType::Unknown)
     , m_enabled(true)
 {
 }
@@ -35,15 +36,21 @@ void QualityControlShortcutManager::configure(const QHash<int, QAbstractButton*>
     m_startButton = startButton;
     m_passButton = passButton;
     m_detailButton = detailButton;
+    if (const auto logger = spdlog::get("qdebug")) {
+        logger->info("[ShortcutManager] configure, typeButtons={}", m_typeButtons.size());
+    }
     setupShortcuts();
 }
 
-void QualityControlShortcutManager::setBrandIsYisuo(bool isYisuo)
+void QualityControlShortcutManager::setServerType(ServerType serverType)
 {
-    if (m_isYisuoBrand == isYisuo) {
+    if (m_serverType == serverType) {
         return;
     }
-    m_isYisuoBrand = isYisuo;
+    m_serverType = serverType;
+    if (const auto logger = spdlog::get("qdebug")) {
+        logger->info("[ShortcutManager] setServerType={}", static_cast<int>(m_serverType));
+    }
     refreshBrandShortcuts();
 }
 
@@ -62,6 +69,9 @@ void QualityControlShortcutManager::setEnabled(bool enabled)
     if (m_detailShortcut) {
         m_detailShortcut->setEnabled(enabled);
     }
+    if (const auto logger = spdlog::get("qdebug")) {
+        logger->debug("[ShortcutManager] setEnabled={}", m_enabled);
+    }
     refreshBrandShortcuts();
 }
 
@@ -73,7 +83,7 @@ void QualityControlShortcutManager::reload()
 void QualityControlShortcutManager::setupShortcuts()
 {
     SettingsService &settings = SettingsService::instance();
-    ensureShortcutDefaults(settings);
+    settings.ensureShortcutDefaults();
     settings.sync();
 
     auto createShortcut = [this](const QString &sequence) {
@@ -83,67 +93,75 @@ void QualityControlShortcutManager::setupShortcuts()
     };
 
     if (!m_escShortcut) {
-        m_escShortcut = createShortcut(readShortcut(settings, QStringLiteral("Shortcuts/ESC"), QStringLiteral("Esc")));
+        m_escShortcut = createShortcut(settings.loadShortcut(QStringLiteral("Shortcuts/ESC")));
         connect(m_escShortcut, &QShortcut::activated, this, [this]() {
             if (m_escButton) {
                 m_escButton->click();
             }
         });
+    } else {
+        m_escShortcut->setKey(QKeySequence(settings.loadShortcut(QStringLiteral("Shortcuts/ESC"))));
     }
 
     if (!m_startShortcut) {
-        m_startShortcut = createShortcut(readShortcut(settings, QStringLiteral("Shortcuts/StartCheck"), QStringLiteral("F")));
+        m_startShortcut = createShortcut(settings.loadShortcut(QStringLiteral("Shortcuts/StartCheck")));
         connect(m_startShortcut, &QShortcut::activated, this, [this]() {
             if (m_startButton) {
                 m_startButton->click();
             }
         });
+    } else {
+        m_startShortcut->setKey(QKeySequence(settings.loadShortcut(QStringLiteral("Shortcuts/StartCheck"))));
     }
 
     if (!m_passShortcut) {
-        m_passShortcut = createShortcut(readShortcut(settings, QStringLiteral("Shortcuts/Pass"), QStringLiteral("Space")));
+        m_passShortcut = createShortcut(settings.loadShortcut(QStringLiteral("Shortcuts/Pass")));
         connect(m_passShortcut, &QShortcut::activated, this, [this]() {
             if (m_passButton) {
                 m_passButton->click();
             }
         });
+    } else {
+        m_passShortcut->setKey(QKeySequence(settings.loadShortcut(QStringLiteral("Shortcuts/Pass"))));
     }
 
     if (!m_detailShortcut) {
-        m_detailShortcut = createShortcut(readShortcut(settings, QStringLiteral("Shortcuts/PersonDetail"), QStringLiteral("`")));
+        m_detailShortcut = createShortcut(settings.loadShortcut(QStringLiteral("Shortcuts/PersonDetail")));
         connect(m_detailShortcut, &QShortcut::activated, this, [this]() {
             if (m_detailButton) {
                 m_detailButton->click();
             }
         });
+    } else {
+        m_detailShortcut->setKey(QKeySequence(settings.loadShortcut(QStringLiteral("Shortcuts/PersonDetail"))));
     }
 
     struct TypeShortcut {
         int type;
         QString key;
-        QString fallback;
     };
 
     const QList<TypeShortcut> typeShortcuts = {
-        {XImage_TF_ED, QStringLiteral("Shortcuts/TF_ED"), QStringLiteral("W")},
-        {XImage_TF_GEN, QStringLiteral("Shortcuts/TF_GEN"), QStringLiteral("Q")},
-        {XImage_TF_HI, QStringLiteral("Shortcuts/TF_HI"), QStringLiteral("E")},
-        {XImage_TF_LOW, QStringLiteral("Shortcuts/TF_LOW"), QStringLiteral("R")},
-        {XImage_TF_OS, QStringLiteral("Shortcuts/TF_OS"), QStringLiteral("3")},
-        {XImage_TF_MS, QStringLiteral("Shortcuts/TF_MS"), QStringLiteral("4")},
-        {XImage_YS_E0, QStringLiteral("Shortcuts/YS_E0"), QStringLiteral("1")},
-        {XImage_YS_E1, QStringLiteral("Shortcuts/YS_E1"), QStringLiteral("2")},
-        {XImage_YS_E2, QStringLiteral("Shortcuts/YS_E2"), QStringLiteral("3")},
-        {XImage_YS_OS, QStringLiteral("Shortcuts/YS_OS"), QStringLiteral("Q")},
-        {XImage_YS_HD, QStringLiteral("Shortcuts/YS_HD"), QStringLiteral("W")},
-        {XImage_YS_SC, QStringLiteral("Shortcuts/YS_SC"), QStringLiteral("E")}
+        {XImage_TF_ED, QStringLiteral("Shortcuts/TF_ED")},
+        {XImage_TF_GEN, QStringLiteral("Shortcuts/TF_GEN")},
+        {XImage_TF_HI, QStringLiteral("Shortcuts/TF_HI")},
+        {XImage_TF_LOW, QStringLiteral("Shortcuts/TF_LOW")},
+        {XImage_TF_OS, QStringLiteral("Shortcuts/TF_OS")},
+        {XImage_TF_MS, QStringLiteral("Shortcuts/TF_MS")},
+        {XImage_YS_E0, QStringLiteral("Shortcuts/YS_E0")},
+        {XImage_YS_E1, QStringLiteral("Shortcuts/YS_E1")},
+        {XImage_YS_E2, QStringLiteral("Shortcuts/YS_E2")},
+        {XImage_YS_OS, QStringLiteral("Shortcuts/YS_OS")},
+        {XImage_YS_HD, QStringLiteral("Shortcuts/YS_HD")},
+        {XImage_YS_SC, QStringLiteral("Shortcuts/YS_SC")}
     };
 
     for (const TypeShortcut &entry : typeShortcuts) {
         if (m_typeShortcuts.contains(entry.type)) {
+            m_typeShortcuts.value(entry.type)->setKey(QKeySequence(settings.loadShortcut(entry.key)));
             continue;
         }
-        QShortcut *shortcut = createShortcut(readShortcut(settings, entry.key, entry.fallback));
+        QShortcut *shortcut = createShortcut(settings.loadShortcut(entry.key));
         m_typeShortcuts.insert(entry.type, shortcut);
         connect(shortcut, &QShortcut::activated, this, [this, entry]() {
             QAbstractButton *button = m_typeButtons.value(entry.type, nullptr);
@@ -160,70 +178,40 @@ void QualityControlShortcutManager::setupShortcuts()
 void QualityControlShortcutManager::refreshBrandShortcuts()
 {
     QSet<int> enabledTypes;
-    if (m_isYisuoBrand) {
+    switch (m_serverType) {
+    case ServerType::YiSuo:
         enabledTypes = {XImage_YS_E0, XImage_YS_E1, XImage_YS_E2, XImage_YS_SC, XImage_YS_OS, XImage_YS_HD};
-    } else {
+        break;
+    case ServerType::TongFang:
         enabledTypes = {XImage_TF_ED, XImage_TF_GEN, XImage_TF_HI, XImage_TF_LOW, XImage_TF_OS, XImage_TF_MS};
+        break;
+    case ServerType::HaiMan:
+        enabledTypes.clear();
+        if (const auto logger = spdlog::get("qdebug")) {
+            logger->warn("[ShortcutManager] unsupported serverType={}, disable type shortcuts",
+                         static_cast<int>(m_serverType));
+        }
+        break;
+    case ServerType::Unknown:
+        enabledTypes.clear();
+        if (const auto logger = spdlog::get("qdebug")) {
+            logger->debug("[ShortcutManager] serverType unknown, disable type shortcuts");
+        }
+        break;
+    default:
+        enabledTypes.clear();
+        if (const auto logger = spdlog::get("qdebug")) {
+            logger->warn("[ShortcutManager] illegal serverType={}, disable type shortcuts",
+                         static_cast<int>(m_serverType));
+        }
+        break;
     }
 
     for (auto it = m_typeShortcuts.begin(); it != m_typeShortcuts.end(); ++it) {
         it.value()->setEnabled(m_enabled && enabledTypes.contains(it.key()));
     }
-}
-
-void QualityControlShortcutManager::ensureShortcutDefaults(SettingsService &settings) const
-{
-    if (!settings.contains(QStringLiteral("Shortcuts/TF_ED"))) {
-        settings.setValue(QStringLiteral("Shortcuts/TF_ED"), QStringLiteral("W"));
+    if (const auto logger = spdlog::get("qdebug")) {
+        logger->debug("[ShortcutManager] refresh shortcuts serverType={}, enabledCount={}",
+                      static_cast<int>(m_serverType), enabledTypes.size());
     }
-    if (!settings.contains(QStringLiteral("Shortcuts/TF_GEN"))) {
-        settings.setValue(QStringLiteral("Shortcuts/TF_GEN"), QStringLiteral("Q"));
-    }
-    if (!settings.contains(QStringLiteral("Shortcuts/TF_HI"))) {
-        settings.setValue(QStringLiteral("Shortcuts/TF_HI"), QStringLiteral("E"));
-    }
-    if (!settings.contains(QStringLiteral("Shortcuts/TF_LOW"))) {
-        settings.setValue(QStringLiteral("Shortcuts/TF_LOW"), QStringLiteral("R"));
-    }
-    if (!settings.contains(QStringLiteral("Shortcuts/TF_OS"))) {
-        settings.setValue(QStringLiteral("Shortcuts/TF_OS"), QStringLiteral("3"));
-    }
-    if (!settings.contains(QStringLiteral("Shortcuts/TF_MS"))) {
-        settings.setValue(QStringLiteral("Shortcuts/TF_MS"), QStringLiteral("4"));
-    }
-    if (!settings.contains(QStringLiteral("Shortcuts/YS_E0"))) {
-        settings.setValue(QStringLiteral("Shortcuts/YS_E0"), QStringLiteral("1"));
-    }
-    if (!settings.contains(QStringLiteral("Shortcuts/YS_E1"))) {
-        settings.setValue(QStringLiteral("Shortcuts/YS_E1"), QStringLiteral("2"));
-    }
-    if (!settings.contains(QStringLiteral("Shortcuts/YS_E2"))) {
-        settings.setValue(QStringLiteral("Shortcuts/YS_E2"), QStringLiteral("3"));
-    }
-    if (!settings.contains(QStringLiteral("Shortcuts/YS_OS"))) {
-        settings.setValue(QStringLiteral("Shortcuts/YS_OS"), QStringLiteral("Q"));
-    }
-    if (!settings.contains(QStringLiteral("Shortcuts/YS_HD"))) {
-        settings.setValue(QStringLiteral("Shortcuts/YS_HD"), QStringLiteral("W"));
-    }
-    if (!settings.contains(QStringLiteral("Shortcuts/YS_SC"))) {
-        settings.setValue(QStringLiteral("Shortcuts/YS_SC"), QStringLiteral("E"));
-    }
-    if (!settings.contains(QStringLiteral("Shortcuts/ESC"))) {
-        settings.setValue(QStringLiteral("Shortcuts/ESC"), QStringLiteral("Esc"));
-    }
-    if (!settings.contains(QStringLiteral("Shortcuts/StartCheck"))) {
-        settings.setValue(QStringLiteral("Shortcuts/StartCheck"), QStringLiteral("F"));
-    }
-    if (!settings.contains(QStringLiteral("Shortcuts/Pass"))) {
-        settings.setValue(QStringLiteral("Shortcuts/Pass"), QStringLiteral("Space"));
-    }
-    if (!settings.contains(QStringLiteral("Shortcuts/PersonDetail"))) {
-        settings.setValue(QStringLiteral("Shortcuts/PersonDetail"), QStringLiteral("`"));
-    }
-}
-
-QString QualityControlShortcutManager::readShortcut(SettingsService &settings, const QString &key, const QString &fallback) const
-{
-    return settings.value(key, fallback).toString();
 }

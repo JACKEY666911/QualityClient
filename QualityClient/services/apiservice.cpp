@@ -13,10 +13,7 @@ ApiService::ApiService(QObject *parent)
 {
     {
         SettingsService &settings = SettingsService::instance();
-        QString baseUrl = settings.value(QStringLiteral("baseUrl"),
-                                         QStringLiteral("http://192.168.1.65:17301/"))
-                              .toString()
-                              .trimmed();
+        QString baseUrl = settings.baseUrl();
         if (!baseUrl.isEmpty()) {
             m_http->setBaseUrl(baseUrl);
         }

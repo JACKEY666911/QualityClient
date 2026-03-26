@@ -1,12 +1,16 @@
-﻿#include "MainView.h"
-#include "services/httpclient.h"
+#include "MainView.h"
 #include "ui_MainView.h"
+#include "logging/logcategories.h"
 
 #include <QVBoxLayout>
 
 MainView::MainView(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::MainView)
+    , m_mainStack(nullptr)
+    , m_loginView(nullptr)
+    , m_mixModeSelectView(nullptr)
+    , m_qualityControlView(nullptr)
 {
     ui->setupUi(this);
     this->setWindowFlags(Qt::FramelessWindowHint);
@@ -14,10 +18,8 @@ MainView::MainView(QWidget *parent)
     m_mainStack = new QStackedWidget(this);
     m_loginView = new LoginView(this);
     m_mixModeSelectView = new MixModeSelectView(this);
-    m_qualityControlView = new QualityControlView(this);
     m_mainStack->addWidget(m_loginView);
     m_mainStack->addWidget(m_mixModeSelectView);
-    m_mainStack->addWidget(m_qualityControlView);
 
     QVBoxLayout *layout = new QVBoxLayout;
     layout->setContentsMargins(0,0,0,0);
@@ -26,9 +28,7 @@ MainView::MainView(QWidget *parent)
     connect(m_loginView, &LoginView::loginSuccess, this, &MainView::handleLoginSuccess);
     connect(m_mixModeSelectView, &MixModeSelectView::loginOut, this, &MainView::handleLoginOut);
     connect(m_mixModeSelectView, &MixModeSelectView::enterQualityControl, this, &MainView::handleEnterQualityControl);
-    connect(m_qualityControlView, &QualityControlView::requestModeSwitch, this, &MainView::handleSwitchModeRequest);
-    m_qualityControlView->setMainImage(QPixmap(":/Images/yisuoTest1.png"));
-    m_qualityControlView->setAuxImage(QPixmap(":/Images/yisuoTest2.png"));
+    qCInfo(lcMainView) << "MainView initialized";
 }
 
 MainView::~MainView()
@@ -38,6 +38,8 @@ MainView::~MainView()
 
 void MainView::handleLoginSuccess(const QString &userName)
 {
+    qCInfo(lcMainView) << "Login success, user=" << userName;
+    m_currentUserName = userName;
     m_mainStack->setCurrentIndex(1);
     if (m_qualityControlView) {
         m_qualityControlView->setUserName(userName);
@@ -50,16 +52,52 @@ void MainView::handleLoginOut()
     {
         return;
     }
+    qCInfo(lcMainView) << "Handle logout";
+    destroyQualityControlView();
+    m_currentUserName.clear();
     m_loginView->reset();
     m_mainStack->setCurrentIndex(0);
 }
 
 void MainView::handleEnterQualityControl()
 {
-    m_mainStack->setCurrentIndex(2);
+    qCInfo(lcMainView) << "Enter QualityControlView";
+    createQualityControlView();
+    if (m_qualityControlView) {
+        m_mainStack->setCurrentWidget(m_qualityControlView);
+    }
 }
 
 void MainView::handleSwitchModeRequest()
 {
+    qCInfo(lcMainView) << "Switch back to MixModeSelectView";
+    destroyQualityControlView();
     m_mainStack->setCurrentIndex(1);
+}
+
+void MainView::createQualityControlView()
+{
+    if (m_qualityControlView) {
+        return;
+    }
+
+    m_qualityControlView = new QualityControlView(this);
+    m_mainStack->addWidget(m_qualityControlView);
+    connect(m_qualityControlView, &QualityControlView::requestModeSwitch, this, &MainView::handleSwitchModeRequest);
+
+    if (!m_currentUserName.isEmpty()) {
+        m_qualityControlView->setUserName(m_currentUserName);
+    }
+}
+
+void MainView::destroyQualityControlView()
+{
+    if (!m_qualityControlView) {
+        return;
+    }
+
+    m_qualityControlView->clearImageDistributeInfo();
+    m_mainStack->removeWidget(m_qualityControlView);
+    m_qualityControlView->deleteLater();
+    m_qualityControlView = nullptr;
 }

@@ -51,6 +51,17 @@ public:
 
     static XrayImage fromJson(const QJsonObject &obj);
 
+    bool operator==(const XrayImage &other) const
+    {
+        return m_mainXrayImageUrl == other.m_mainXrayImageUrl
+            && m_assistXrayImageUrl == other.m_assistXrayImageUrl;
+    }
+
+    bool operator!=(const XrayImage &other) const
+    {
+        return !(*this == other);
+    }
+
 private:
     void updateNameFromEnhancedType();
     void updateNameFromPbEnhancedType(const QString &value);

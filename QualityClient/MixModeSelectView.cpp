@@ -2,16 +2,17 @@
 #include "ui_MixModeSelectView.h"
 
 #include <QButtonGroup>
-#include <QDebug>
 #include <QTimer>
 
 #include <widgets/CheckComBoBox.h>
+#include "logging/logcategories.h"
 // #include "widgets/moderndatetimepicker.h"
 MixModeSelectView::MixModeSelectView(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::MixModeSelectView)
 {
     ui->setupUi(this);
+    qCInfo(lcMainView) << "[MixModeSelectView] initialized";
     //定时器相关
     m_timeTimer = new QTimer(this);
     connect(m_timeTimer, &QTimer::timeout, this, &MixModeSelectView::updateCurrentTime);
@@ -54,16 +55,19 @@ MixModeSelectView::~MixModeSelectView()
 
 void MixModeSelectView::on_loginoutButton_clicked()
 {
+    qCInfo(lcMainView) << "[MixModeSelectView] logout clicked";
     emit loginOut();
 }
 
 void MixModeSelectView::on_switchToMainViewBtn_clicked()
 {
+    qCInfo(lcMainView) << "[MixModeSelectView] enter quality control clicked";
     emit enterQualityControl();
 }
 
 void MixModeSelectView::on_loginOutBtn_clicked()
 {
+    qCInfo(lcMainView) << "[MixModeSelectView] logout clicked (secondary)";
     emit loginOut();
 }
 
@@ -126,7 +130,7 @@ void MixModeSelectView::updateModeUI(QAbstractButton *clickedBtn, TimeRangeMode 
         target->style()->polish(target);
     }
 
-    qDebug() << "Current Mode:" << mode;
+    qCInfo(lcMainView) << "[MixModeSelectView] current mode changed to" << mode;
 }
 
 

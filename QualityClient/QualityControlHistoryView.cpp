@@ -3,39 +3,66 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QPushButton>
+#include <QSet>
 
 #include "services/qualitycontrolhistoryservice.h"
-#include "services/qualitycontrolcontroller.h"
+#include "widgets/LayerViewWidget.h"
+#include "logging/logcategories.h"
+
+namespace {
+QString firstNonEmpty(const QString &a, const QString &b, const QString &fallback = QStringLiteral("--"))
+{
+    if (!a.trimmed().isEmpty()) {
+        return a;
+    }
+    if (!b.trimmed().isEmpty()) {
+        return b;
+    }
+    return fallback;
+}
+
+}
 
 QualityControlHistoryView::QualityControlHistoryView(QWidget *parent)
     : QualityControlBaseView(parent)
     , m_backButton(nullptr)
     , m_titleLabel(nullptr)
     , m_service(new QualityControlHistoryService(this))
-    , m_controller(new QualityControlController(this))
 {
     initializeLayout();
+    qCInfo(lcQcView) << "[HistoryView] initialized";
 
     connect(m_startCheckButton, &QPushButton::clicked, m_service, &QualityControlHistoryService::startCheck);
     connect(m_passButton, &QPushButton::clicked, m_service, &QualityControlHistoryService::pass);
     connect(m_detailButton, &QPushButton::clicked, m_service, &QualityControlHistoryService::openPersonDetail);
     connect(this, &QualityControlBaseView::xrayTypeToggled, m_service, &QualityControlHistoryService::switchXrayType);
+}
 
-    connect(m_service, &QualityControlHistoryService::availableTypesReceived, m_controller, &QualityControlController::setAvailableTypes);
-    connect(m_service, &QualityControlHistoryService::mainImageReceived, m_controller, &QualityControlController::setMainImage);
-    connect(m_service, &QualityControlHistoryService::auxImageReceived, m_controller, &QualityControlController::setAuxImage);
-    connect(m_service, &QualityControlHistoryService::judgeResultReceived, m_controller, &QualityControlController::setJudgeResultText);
-    connect(m_service, &QualityControlHistoryService::freshnessReceived, m_controller, &QualityControlController::setFreshnessText);
-    connect(m_service, &QualityControlHistoryService::channelReceived, m_controller, &QualityControlController::setChannelText);
-    connect(m_service, &QualityControlHistoryService::timeTextReceived, m_controller, &QualityControlController::setTimeText);
+void QualityControlHistoryView::setImageDistributeInfo(const ImageDistributeInfo &info)
+{
+    qCInfo(lcQcView) << "[HistoryView] setImageDistributeInfo taskId=" << info.id << ", type=" << info.type;
+    m_currentDistributeInfo = info;
+    setBottomBarTaskActive(true);
+    setBrandByType(info.type);
 
-    connect(m_controller, &QualityControlController::availableTypesChanged, this, &QualityControlBaseView::setAvailableXrayTypes);
-    connect(m_controller, &QualityControlController::mainImageChanged, this, &QualityControlBaseView::setMainImage);
-    connect(m_controller, &QualityControlController::auxImageChanged, this, &QualityControlBaseView::setAuxImage);
-    connect(m_controller, &QualityControlController::judgeResultChanged, this, &QualityControlBaseView::setJudgeResultText);
-    connect(m_controller, &QualityControlController::freshnessChanged, this, &QualityControlBaseView::setFreshnessText);
-    connect(m_controller, &QualityControlController::channelChanged, this, &QualityControlBaseView::setChannelText);
-    connect(m_controller, &QualityControlController::timeTextChanged, this, &QualityControlBaseView::setTimeText);
+    setChannelText(firstNonEmpty(info.channelNoValue, info.channelNo));
+    setTimeText(firstNonEmpty(info.qualityControlTime, info.checkTime));
+    setFreshnessText(info.freshness.trimmed().isEmpty() ? QStringLiteral("--") : info.freshness);
+
+    if (info.qualityResult.isNull()) {
+        setJudgeResultText(QStringLiteral("--"));
+    } else {
+        setJudgeResultText(info.qualityResult.toString());
+    }
+
+    configureTaskImages(info);
+}
+
+void QualityControlHistoryView::clearImageDistributeInfo()
+{
+    qCInfo(lcQcView) << "[HistoryView] clearImageDistributeInfo";
+    m_currentDistributeInfo = ImageDistributeInfo();
+    clearBaseViewState();
 }
 
 QWidget *QualityControlHistoryView::buildTopBar()
@@ -55,7 +82,10 @@ QWidget *QualityControlHistoryView::buildTopBar()
     layout->setSpacing(12);
 
     m_backButton = new QPushButton(QStringLiteral("返回"), topBar);
-    connect(m_backButton, &QPushButton::clicked, this, &QualityControlHistoryView::requestBack);
+    connect(m_backButton, &QPushButton::clicked, this, [this]() {
+        qCInfo(lcQcView) << "[HistoryView] back clicked";
+        emit requestBack();
+    });
 
     m_titleLabel = new QLabel(QStringLiteral("质控记录回查"), topBar);
     QFont titleFont;

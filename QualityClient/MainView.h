@@ -26,11 +26,15 @@ private slots:
     void handleSwitchModeRequest();
 
 private:
+    void createQualityControlView();
+    void destroyQualityControlView();
+
     Ui::MainView *ui;
     QStackedWidget *m_mainStack;
     LoginView *m_loginView;
     MixModeSelectView * m_mixModeSelectView;
     QualityControlView *m_qualityControlView;
+    QString m_currentUserName;
 };
 
 #endif // MAINVIEW_H

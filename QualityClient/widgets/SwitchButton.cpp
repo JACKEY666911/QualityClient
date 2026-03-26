@@ -8,15 +8,15 @@ SwitchButton::SwitchButton(QWidget *parent)
       m_onText(QStringLiteral("继续")),
       m_offText(QStringLiteral("暂停")),
       m_onColor(QColor(QStringLiteral("#2ecc71"))),
-      m_offColor(QColor(QStringLiteral("#e74c3c"))),
+      m_offColor(QColor(QStringLiteral("#808080"))),
       m_knobColor(Qt::white),
       m_activeTextColor(Qt::white),
-      m_inactiveTextColor(QColor(QStringLiteral("#bfe6f1"))),
-      m_textSpacing(8)
+      m_inactiveTextColor(QColor(QStringLiteral("#6c7679"))),
+      m_textSpacing(6)
 {
     setCheckable(true);
     setCursor(Qt::PointingHandCursor);
-    setMinimumHeight(26);
+    setMinimumHeight(32);
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 }
 
@@ -135,14 +135,28 @@ void SwitchButton::setTextSpacing(int spacing)
 
 QSize SwitchButton::sizeHint() const
 {
-    const int trackWidth = 40;
-    const int trackHeight = 20;
+    const int trackWidth = 44;
+    const int trackHeight = 24;
     QFontMetrics fm(font());
+
     int leftTextWidth = fm.horizontalAdvance(m_offText);
     int rightTextWidth = fm.horizontalAdvance(m_onText);
-    int w = leftTextWidth + rightTextWidth + trackWidth + m_textSpacing * 2 + 8;
-    int h = qMax(trackHeight, fm.height()) + 6;
+    int w = leftTextWidth + rightTextWidth + trackWidth + m_textSpacing * 2 + 16;
+    int h = qMax(trackHeight, fm.height()) + 8;
     return QSize(w, h);
+}
+
+void SwitchButton::setSwitchChecked(bool checked)
+{
+    if (isChecked() != checked) {
+        setChecked(checked);
+        update();  // 触发重绘
+    }
+}
+
+void SwitchButton::toggle()
+{
+    setSwitchChecked(!isChecked());
 }
 
 void SwitchButton::paintEvent(QPaintEvent *event)
@@ -151,10 +165,16 @@ void SwitchButton::paintEvent(QPaintEvent *event)
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing, true);
 
-    const int trackWidth = 40;
-    const int trackHeight = 20;
+    QFont font = this->font();
+    font.setFamily("Microsoft YaHei");
+    font.setPointSize(font.pointSize() + 3);
+    font.setBold(true);
+    painter.setFont(font);
+
+    const int trackWidth = 44;
+    const int trackHeight = 24;
     // const int margin = 2;
-    QFontMetrics fm(font());
+    QFontMetrics fm(font);
     int leftTextWidth = fm.horizontalAdvance(m_offText);
     int rightTextWidth = fm.horizontalAdvance(m_onText);
     int totalTextWidth = leftTextWidth + rightTextWidth;

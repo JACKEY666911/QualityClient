@@ -48,6 +48,36 @@ class SettingsService : public QObject {
     void endArray();
     int beginReadArray(const QString &prefix);
 
+    // Typed settings accessors
+    void loadSetting(const QString &settingsPath = QString());
+    void ensureShortcutDefaults();
+    QString loadShortcut(const QString &key, const QString &fallback = QString()) const;
+
+    template <typename T>
+    T loadSetting(const QString &key, const T &defaultValue) const
+    {
+        return value(key, QVariant::fromValue(defaultValue)).template value<T>();
+    }
+
+    int maxBindPersons() const;
+    QString baseUrl() const;
+    int qcCountdownSec() const;
+    QString mqHostName() const;
+    QString mqUserName() const;
+    QString mqPassword() const;
+    int mqPort() const;
+    int historyQueryCount() const;
+    QString aiContrabandsColor() const;
+    int enhancedImageTimeOut() const;
+    int inspectionLowThreshold() const;
+    int inspectionHighThreshold() const;
+    int commonTimeOut() const;
+    int taskFetchTime() const;
+    int videoBackTimeSpan() const;
+    QString deviceCode() const;
+    QString airportCode() const;
+    QString areaCode() const;
+
     // Delete copy constructor and assignment operator
     SettingsService(const SettingsService &) = delete;
     SettingsService &operator=(const SettingsService &) = delete;
@@ -58,10 +88,10 @@ class SettingsService : public QObject {
    private:
     QSettings m_settings;
     QString m_group;
-    QString m_arrayPrefix;
     int m_arrayIndex;
     QStringList m_arrayStack;
 
     static QHash<QString, QVariant> *cache();
+    static const QHash<QString, QString> &shortcutDefaults();
     QString getFullKey(const QString &key) const;
 };

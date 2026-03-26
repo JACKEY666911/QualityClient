@@ -8,6 +8,8 @@
 
 #include <services/apiservice.h>
 #include <services/httpclientasync.h>
+#include <services/settingsservice.h>
+#include "logging/logcategories.h"
 
 LoginView::LoginView(QWidget *parent)
     : QWidget(parent)
@@ -19,10 +21,11 @@ LoginView::LoginView(QWidget *parent)
 
     // 2. 设置渐变颜色（匹配WPF效果：白色→#00E1FF）
     titleLabel->setStartColor(Qt::white);
-    titleLabel->setEndColor(QColor("#00E1FF"));
+    titleLabel->setEndColor(QColor(tr("#00E1FF")));
 
     // 3. 设置渐变方向（垂直渐变，和WPF一致）
     titleLabel->setGradientDirection(GradientDirection::Vertical);
+    qCInfo(lcMainView) << "[LoginView] initialized";
 }
 
 LoginView::~LoginView()
@@ -58,6 +61,10 @@ void LoginView::on_showPassBtn_toggled(bool checked)
 
 void LoginView::on_loginButton_clicked()
 {
+    qCInfo(lcMainView) << "[LoginView] login button clicked";
+    qCWarning(lcMainView) << "[LoginView] test shortcut enabled, emit loginSuccess directly";
+    emit loginSuccess("1");
+    return ;
     // 1. 获取输入并去空格
     QString username = ui->userNameInput->text().trimmed();
     QString password = ui->passwordInput->text();
@@ -77,7 +84,7 @@ void LoginView::on_loginButton_clicked()
     LoginRequest req;
     req.username = username;
     req.password = hashedPassword;
-    req.deviceCode = "PC-CLIENT-001";
+    req.deviceCode = SettingsService::instance().deviceCode();
     req.deviceType = 2000;
     auto future = ApiService::instance().login(req);
     future.then(this, [this, username](const HttpClientAsync::HttpResponse &res){
@@ -86,16 +93,18 @@ void LoginView::on_loginButton_clicked()
                   // 解析登录返回的 Token
                   UserModel user = UserModel::fromJson(res.dataObject());
                   // 设置全局拦截器 Token
-                  ApiService::instance().setAuthToken(user.tokenHead, user.token);
-                  emit loginSuccess(username);
+                   ApiService::instance().setAuthToken(user.tokenHead, user.token);
+                   qCInfo(lcMainView) << "[LoginView] login success, user=" << username;
+                   emit loginSuccess(username);
               } else {
                   // 登录失败：可能是密码错，也可能是服务器连不上
+                  qCWarning(lcMainView) << "[LoginView] login failed:" << res.error;
                   QMessageBox::critical(this, "登录失败", res.error);
               }
 
     }).onFailed(this, [this](const std::exception& e) {
             ui->loginButton->setEnabled(true);
-            qDebug() << "网络层异常：" << e.what();
+            qCWarning(lcMainView) << "[LoginView] network exception:" << e.what();
         });
     // 禁用登录按钮，防止重复点击
     ui->loginButton->setEnabled(false);

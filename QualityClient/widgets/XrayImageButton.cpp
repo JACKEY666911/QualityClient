@@ -1,6 +1,7 @@
 #include "XrayImageButton.h"
 
 #include <QImage>
+#include <QPainter>
 
 XrayImageButton::XrayImageButton(int typeId, const QString &label, QWidget *parent)
     : QPushButton(parent)
@@ -115,6 +116,11 @@ QPixmap XrayImageButton::makeGray(const QPixmap &source)
     if (source.isNull()) {
         return {};
     }
-    QImage image = source.toImage().convertToFormat(QImage::Format_Grayscale8);
-    return QPixmap::fromImage(image);
+    QPixmap result = source;
+
+    QPainter painter(&result);
+    painter.fillRect(result.rect(), QColor(229, 229, 229, 160)); // 白色，约63%透明度
+    painter.end();
+
+    return result;
 }

@@ -171,12 +171,12 @@
         <file>Images/ys_os_gray.png</file>
         <file>Images/ys_os_normal.png</file>
         <file>Images/ysChannel.png</file>
-        <file>Images/envelope</file>
         <file>Images/tf_os.png</file>
         <file>Images/tf_ms.png</file>
         <file>Images/clock.png</file>
         <file>Images/src_003.jpg</file>
         <file>qss/PaginationWidget.qss</file>
+        <file>Images/envelope.png</file>
     </qresource>
     <qresource prefix="/style"/>
 </RCC>
