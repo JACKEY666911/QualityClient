@@ -18,6 +18,7 @@ public:
 
 signals:
     void requestBack();
+    void requestPersonBaggagePage();
 
 private:
     QWidget *buildTopBar() override;

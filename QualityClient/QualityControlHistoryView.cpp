@@ -32,9 +32,10 @@ QualityControlHistoryView::QualityControlHistoryView(QWidget *parent)
     initializeLayout();
     qCInfo(lcQcView) << "[HistoryView] initialized";
 
-    connect(m_startCheckButton, &QPushButton::clicked, m_service, &QualityControlHistoryService::startCheck);
-    connect(m_passButton, &QPushButton::clicked, m_service, &QualityControlHistoryService::pass);
-    connect(m_detailButton, &QPushButton::clicked, m_service, &QualityControlHistoryService::openPersonDetail);
+    connect(this, &QualityControlBaseView::startCheckRequested, m_service, &QualityControlHistoryService::startCheck);
+    connect(this, &QualityControlBaseView::passRequested, m_service, &QualityControlHistoryService::pass);
+    connect(this, &QualityControlBaseView::detailRequested, m_service, &QualityControlHistoryService::openPersonDetail);
+    connect(this, &QualityControlBaseView::detailRequested, this, &QualityControlHistoryView::requestPersonBaggagePage);
     connect(this, &QualityControlBaseView::xrayTypeToggled, m_service, &QualityControlHistoryService::switchXrayType);
 }
 
@@ -67,7 +68,7 @@ void QualityControlHistoryView::clearImageDistributeInfo()
 
 QWidget *QualityControlHistoryView::buildTopBar()
 {
-    QWidget *topBar = new QWidget(this);
+    QWidget *topBar = new QWidget(contentParent());
     topBar->setMinimumHeight(55);
     topBar->setMaximumHeight(55);
     topBar->setObjectName(QStringLiteral("qcHistoryTopBar"));

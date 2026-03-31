@@ -61,4 +61,6 @@ public:
     }
 };
 
+Q_DECLARE_METATYPE(QueryInfo*)
+
 #endif

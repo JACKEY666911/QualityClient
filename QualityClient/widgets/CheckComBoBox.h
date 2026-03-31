@@ -68,6 +68,7 @@ public:
 protected:
     void showPopup() override;
     void hidePopup() override;
+    bool eventFilter(QObject *watched, QEvent *event) override;
 
 private slots:
     void updateText();

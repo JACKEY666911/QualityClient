@@ -1,18 +1,22 @@
 #ifndef QUALITYCONTROLVIEW_H
 #define QUALITYCONTROLVIEW_H
 
+#include "HistoryMainView.h"
 #include "QualityControlBaseView.h"
 #include "untils/timecounter.h"
 #include "Models/ImageDistributeInfo.h"
 
 #include <QStringList>
+#include <QVector>
 
 class QLabel;
 class QPushButton;
 class SwitchButton;
 class QTimer;
 class QPixmap;
+class QStackedWidget;
 class QualityControlService;
+class HistoryMainViewWidget;
 class QualityControlHistoryView;
 class PersonBaggageView;
 
@@ -45,6 +49,8 @@ private slots:
     void handleDurationTick(const int sec);
     void handleDurationFinish();
     void openHistoryView();
+    void closeHistoryMainView();
+    void openHistoryDetailView(const ImageDistributeInfo &info);
     void closeHistoryView();
     void openPersonBaggageView();
     void closePersonBaggageView();
@@ -62,6 +68,10 @@ private:
     void cacheAndPauseForSubView();
     void restorePauseAfterSubView();
     void resetSubViewsForNewImage();
+    void switchToHomePage();
+    bool switchToHistoryPage();
+    bool switchToHistoryDetailPage(const ImageDistributeInfo &info);
+    void switchToPersonBaggagePage();
     void updatePullState();
 
     QLabel *m_taskCountLabel;
@@ -74,16 +84,24 @@ private:
     QPushButton *m_statsButton;
     QPushButton *m_historyButton;
     QPushButton *m_switchModeButton;
+    QStackedWidget *m_navStack;
+    QWidget *m_homePage;
+    HistoryMainView *m_historyMainView;
     QualityControlHistoryView *m_historyView;
     PersonBaggageView *m_personBaggageView;
+
+    struct SubViewSuspendState {
+        bool pauseChecked = false;
+        bool counterWasRunning = false;
+        QWidget *returnPage = nullptr;
+    };
+    QVector<SubViewSuspendState> m_subViewSuspendStack;
 
     QStringList m_testImages;
     int m_testIndex;
 
     TimeCounter *m_secCounter;
     int m_elapsedSeconds;
-    bool m_cachedPauseChecked;
-    bool m_cachedCounterRunning;
     bool m_hasCurrentTask;
     PullState m_pullState;
     int m_consecutiveFetchErrors;

@@ -542,6 +542,12 @@ QPushButton#TimeSelectButton_10
            </property>
            <item>
             <widget class="QLabel" name="label_5">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="minimumSize">
               <size>
                <width>160</width>
@@ -564,15 +570,21 @@ QPushButton#TimeSelectButton_10
            </item>
            <item>
             <widget class="CheckComBoBox" name="realCheckComboBox">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="minimumSize">
               <size>
-               <width>245</width>
+               <width>248</width>
                <height>35</height>
               </size>
              </property>
              <property name="maximumSize">
               <size>
-               <width>800</width>
+               <width>810</width>
                <height>16777215</height>
               </size>
              </property>
@@ -780,13 +792,13 @@ QPushButton#TimeSelectButton_10
              </property>
              <property name="minimumSize">
               <size>
-               <width>245</width>
+               <width>248</width>
                <height>35</height>
               </size>
              </property>
              <property name="maximumSize">
               <size>
-               <width>800</width>
+               <width>810</width>
                <height>16777215</height>
               </size>
              </property>
@@ -851,7 +863,7 @@ QPushButton#TimeSelectButton_10
              <property name="minimumSize">
               <size>
                <width>375</width>
-               <height>35</height>
+               <height>44</height>
               </size>
              </property>
              <property name="font">
@@ -912,7 +924,7 @@ QPushButton#TimeSelectButton_10
              <property name="minimumSize">
               <size>
                <width>375</width>
-               <height>35</height>
+               <height>44</height>
               </size>
              </property>
              <property name="font">

@@ -6,6 +6,7 @@
 #include <QSet>
 #include <QHash>
 #include <QStringList>
+#include <functional>
 
 #include "Models/GlobalEnums.h"
 #include "Models/ImageDistributeInfo.h"
@@ -45,12 +46,14 @@ public:
     void setBottomBarTaskActive(bool hasTask);
 
 signals:
+    void startCheckRequested();
+    void passRequested();
+    void detailRequested();
     void xrayTypeUnavailableClicked(int type);
     void xrayTypeToggled(int type, bool selected);
 
 protected slots:
     void handleViewActivated(AnnotationGraphicsView *view);
-    void handleDetailButtonClicked();
 protected:
     struct XrayButtonSpec {
         int typeId;
@@ -65,7 +68,7 @@ protected:
     void hideEvent(QHideEvent *event) override;
     void changeEvent(QEvent *event) override;
 
-    void initializeLayout();
+    void initializeLayout(QWidget *host = nullptr);
     virtual QWidget *buildTopBar() = 0;
     QWidget *buildMiddleArea();
     QWidget *buildBottomBar();
@@ -102,6 +105,15 @@ protected:
     void clearPendingDisplayTarget();
     void queuePendingDisplayTarget(int type, int overlayIndex, const QString &mainUrl, const QString &auxUrl);
     bool tryApplyPendingDisplayTarget();
+    template <typename TWidget>
+    void showOverlayChild(TWidget *&child,
+                          const std::function<TWidget*()> &creator,
+                          const std::function<void(TWidget*)> &onCreated = {});
+    template <typename TWidget>
+    void hideOverlayChild(TWidget *child, const std::function<void(TWidget*)> &onHidden = {});
+    template <typename TWidget>
+    void syncOverlayChildGeometry(TWidget *child) const;
+    QWidget *contentParent() const;
 
     AnnotationGraphicsView *m_mainView;
     AnnotationGraphicsView *m_auxView;
@@ -160,6 +172,49 @@ protected:
     QString m_pendingAuxUrl;                       // 待生效辅图 URL
     int m_originInitialIndex = 0;                  // 当前任务原图门禁对应的初始 overlay 下标
     QTimer *m_originGateTimer = nullptr;           // 原图门禁超时定时器
+    QWidget *m_layoutHost = nullptr;               // 主页内容宿主，默认是本体，可切到 stack page
 };
+
+template <typename TWidget>
+void QualityControlBaseView::showOverlayChild(TWidget *&child,
+                                              const std::function<TWidget*()> &creator,
+                                              const std::function<void(TWidget*)> &onCreated)
+{
+    if (child && child->isVisible()) {
+        return;
+    }
+    if (!child) {
+        child = creator ? creator() : nullptr;
+        if (child && onCreated) {
+            onCreated(child);
+        }
+    }
+    if (!child) {
+        return;
+    }
+    child->setGeometry(rect());
+    child->show();
+    child->raise();
+}
+
+template <typename TWidget>
+void QualityControlBaseView::hideOverlayChild(TWidget *child, const std::function<void(TWidget*)> &onHidden)
+{
+    if (!child) {
+        return;
+    }
+    if (onHidden) {
+        onHidden(child);
+    }
+    child->hide();
+}
+
+template <typename TWidget>
+void QualityControlBaseView::syncOverlayChildGeometry(TWidget *child) const
+{
+    if (child) {
+        child->setGeometry(rect());
+    }
+}
 
 #endif // QUALITYCONTROLBASEVIEW_H

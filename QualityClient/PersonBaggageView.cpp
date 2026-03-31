@@ -1,5 +1,5 @@
-#include "personbaggageview.h"
-#include "ui_personbaggageview.h"
+#include "PersonBaggageView.h"
+#include "ui_PersonBaggageView.h"
 
 PersonBaggageView::PersonBaggageView(QWidget *parent)
     : QWidget(parent)

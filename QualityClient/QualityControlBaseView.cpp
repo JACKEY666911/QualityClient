@@ -155,8 +155,9 @@ QualityControlBaseView::QualityControlBaseView(QWidget *parent)
             this, &QualityControlBaseView::onImageProviderUpdated);
 }
 
-void QualityControlBaseView::initializeLayout()
+void QualityControlBaseView::initializeLayout(QWidget *host)
 {
+    m_layoutHost = host ? host : this;
     QVBoxLayout *rootLayout = new QVBoxLayout;
     rootLayout->setContentsMargins(0, 0, 0, 0);
     rootLayout->setSpacing(0);
@@ -165,9 +166,9 @@ void QualityControlBaseView::initializeLayout()
     rootLayout->addWidget(buildMiddleArea());
     rootLayout->addWidget(buildBottomBar());
 
-    setLayout(rootLayout);
-    setMinimumSize(1920, 1080);
-    setMaximumSize(1920, 1080);
+    m_layoutHost->setLayout(rootLayout);
+    m_layoutHost->setMinimumSize(1920, 1080);
+    m_layoutHost->setMaximumSize(1920, 1080);
 }
 
 QList<QualityControlBaseView::XrayButtonSpec> QualityControlBaseView::tongfangSpecs()
@@ -189,8 +190,8 @@ QList<QualityControlBaseView::XrayButtonSpec> QualityControlBaseView::yisuoSpecs
         {XImage_YS_E1, QStringLiteral("E1"), QStringLiteral(":/Images/E1_gray.png"), QStringLiteral(":/Images/E1.png"), QStringLiteral(":/Images/E1_2.png")},
         {XImage_YS_E2, QStringLiteral("E2"), QStringLiteral(":/Images/E2_gray.png"), QStringLiteral(":/Images/E2.png"), QStringLiteral(":/Images/E2_2.png")},
         {XImage_YS_SC, QStringLiteral("SC"), QStringLiteral(":/Images/SC_gray.png"), QStringLiteral(":/Images/SC.png"), QStringLiteral(":/Images/SC_2.png")},
-        {XImage_YS_OS, QStringLiteral("OC"), QStringLiteral(":/Images/OC_gray).png"), QStringLiteral(":/Images/OC.png"), QStringLiteral(":/Images/OC_2.png")},
-        {XImage_YS_HD, QStringLiteral("HD"), QStringLiteral(":/Images/HD_gray).png"), QStringLiteral(":/Images/HD.png"), QStringLiteral(":/Images/HD_2.png")}
+        {XImage_YS_OS, QStringLiteral("OC"), QStringLiteral(":/Images/OC_gray.png"), QStringLiteral(":/Images/OC.png"), QStringLiteral(":/Images/OC_2.png")},
+        {XImage_YS_HD, QStringLiteral("HD"), QStringLiteral(":/Images/HD_gray.png"), QStringLiteral(":/Images/HD.png"), QStringLiteral(":/Images/HD_2.png")}
     };
 }
 
@@ -459,11 +460,6 @@ void QualityControlBaseView::handleViewActivated(AnnotationGraphicsView *view)
     }
 }
 
-void QualityControlBaseView::handleDetailButtonClicked()
-{
-
-}
-
 bool QualityControlBaseView::eventFilter(QObject *watched, QEvent *event)
 {
     if (watched == m_middleArea && event->type() == QEvent::Resize) {
@@ -496,7 +492,7 @@ void QualityControlBaseView::changeEvent(QEvent *event)
 
 QWidget *QualityControlBaseView::buildMiddleArea()
 {
-    QWidget *middle = new QWidget(this);
+    QWidget *middle = new QWidget(contentParent());
     m_middleArea = middle;
     middle->setMinimumHeight(898);
     middle->setMaximumHeight(898);
@@ -553,7 +549,7 @@ QWidget *QualityControlBaseView::buildMiddleArea()
 
 QWidget *QualityControlBaseView::buildBottomBar()
 {
-    QWidget *bottom = new QWidget(this);
+    QWidget *bottom = new QWidget(contentParent());
     bottom->setStyleSheet(QStringLiteral("background-color: #ffffff;"));
 
     bottom->setMinimumHeight(127);
@@ -630,7 +626,9 @@ QWidget *QualityControlBaseView::buildBottomBar()
                                         QStringLiteral("QPushButton{background:#80b7d8;color:white;border-radius:6px;padding:6px 16px;font-size:11pt;font-weight:bold;}"));
     actionRow2Layout->addWidget(m_detailButton);
     actionRow2Layout->addWidget(m_aiToggleButton);
-    connect(m_detailButton, &QPushButton::clicked, this, &QualityControlBaseView::handleDetailButtonClicked);
+    connect(m_startCheckButton, &QPushButton::clicked, this, &QualityControlBaseView::startCheckRequested);
+    connect(m_passButton, &QPushButton::clicked, this, &QualityControlBaseView::passRequested);
+    connect(m_detailButton, &QPushButton::clicked, this, &QualityControlBaseView::detailRequested);
     actionLayout->addWidget(actionRow1);
     actionLayout->addWidget(actionRow2);
 
@@ -769,7 +767,7 @@ QWidget *QualityControlBaseView::buildBottomBar()
 
 QWidget *QualityControlBaseView::buildBrandButtons(ServerType brandType, const QList<XrayButtonSpec> &specs, QList<XrayImageButton*> *buttonList)
 {
-    QWidget *container = new QWidget(this);
+    QWidget *container = new QWidget(contentParent());
     QGridLayout *layout = new QGridLayout(container);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setHorizontalSpacing(14);
@@ -864,6 +862,11 @@ QWidget *QualityControlBaseView::buildBrandButtons(ServerType brandType, const Q
     m_zoomInButtonsByBrand.insert(brandKey, zoomInButton);
     m_zoomOutButtonsByBrand.insert(brandKey, zoomOutButton);
     return container;
+}
+
+QWidget *QualityControlBaseView::contentParent() const
+{
+    return m_layoutHost ? m_layoutHost : const_cast<QualityControlBaseView*>(this);
 }
 
 void QualityControlBaseView::handleXrayButtonClicked(XrayImageButton *button)

@@ -43,6 +43,11 @@ MixModeSelectView::MixModeSelectView(QWidget *parent) :
     QList<AreaInfo> list;
     list << AreaInfo(1, "北京")
          << AreaInfo(2, "上海")
+         << AreaInfo(2, "上海")
+         << AreaInfo(2, "上海")
+         << AreaInfo(2, "上海")
+         << AreaInfo(2, "上海")
+         << AreaInfo(2, "上海")
          << AreaInfo(3, "深圳");
     ui->realCheckComboBox->setAreas(list);
     ui->IntervalCheckComboBox->setAreas(list);

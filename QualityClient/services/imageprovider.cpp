@@ -1,102 +1,151 @@
 #include "imageprovider.h"
-#include "logging/logcategories.h"
 
 #include <QDateTime>
+#include <QFileInfo>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
+#include <QThreadPool>
 #include <QUrl>
-
 namespace {
-constexpr int kMaxCacheCostKb = 50 * 1024; // 50 MB
+constexpr int kMaxCacheCostKb = 50 * 1024;  // 50 MB
 constexpr qint64 kRetryCooldownMs = 5000;
+}  // namespace
+
+ImageProvider& ImageProvider::instance() {
+  static ImageProvider provider;
+  return provider;
 }
 
-ImageProvider &ImageProvider::instance()
-{
-    static ImageProvider provider;
-    return provider;
-}
+ImageProvider::ImageProvider(QObject* parent)
+    : QObject(parent),
+      m_manager(new QNetworkAccessManager(this)),
+      m_cache(kMaxCacheCostKb) {}
 
-ImageProvider::ImageProvider(QObject *parent)
-    : QObject(parent)
-    , m_manager(new QNetworkAccessManager(this))
-    , m_cache(kMaxCacheCostKb)
-{
-}
+void ImageProvider::loadRemote(const QString& url) {
+  QNetworkRequest req((QUrl(url)));
+  req.setAttribute(QNetworkRequest::HttpPipeliningAllowedAttribute, true);
 
-QPixmap ImageProvider::cached(const QString &url) const
-{
-    if (url.isEmpty()) {
-        return QPixmap();
+  QNetworkReply* reply = m_manager->get(req);
+  connect(reply, &QNetworkReply::finished, this, [this, reply, url]() {
+    if (reply->error() != QNetworkReply::NoError) {
+      processImageResult(url, QImage(), false, false);
+      reply->deleteLater();
+      return;
     }
 
-    if (QPixmap *pix = m_cache.object(url)) {
-        return *pix;
-    }
+    const QByteArray data = reply->readAll();
+    reply->deleteLater();
 
-    if (!isRemoteUrl(url)) {
-        QPixmap local(url);
-        if (!local.isNull()) {
-            m_cache.insert(url, new QPixmap(local), cacheCost(local));
-        }
-        return local;
-    }
-
-    return QPixmap();
-}
-
-void ImageProvider::request(const QString &url)
-{
-    if (!isRemoteUrl(url) || m_inFlight.contains(url) || m_cache.contains(url)) {
-        return;
-    }
-
-    const qint64 nowMs = QDateTime::currentMSecsSinceEpoch();
-    if (m_nextRetryAtMs.value(url, 0) > nowMs) {
-        qCDebug(lcQcService) << "[ImageProvider] url in cooldown, skip request:" << url;
-        return;
-    }
-
-    m_inFlight.insert(url);
-    qCDebug(lcQcService) << "[ImageProvider] request start:" << url;
-    QNetworkReply *reply = m_manager->get(QNetworkRequest(QUrl(url)));
-    connect(reply, &QNetworkReply::finished, this, [this, reply, url]() {
-        m_inFlight.remove(url);
-
-        bool success = false;
-        if (reply->error() == QNetworkReply::NoError) {
-            QPixmap pixmap;
-            if (pixmap.loadFromData(reply->readAll()) && !pixmap.isNull()) {
-                m_cache.insert(url, new QPixmap(pixmap), cacheCost(pixmap));
-                m_nextRetryAtMs.remove(url);
-                success = true;
-            }
-        }
-
-        if (!success) {
-            m_cache.remove(url);
-            m_nextRetryAtMs.insert(url, QDateTime::currentMSecsSinceEpoch() + kRetryCooldownMs);
-            qCWarning(lcQcService) << "[ImageProvider] request failed:" << url
-                                   << "err=" << reply->errorString();
-        } else {
-            qCDebug(lcQcService) << "[ImageProvider] request success:" << url;
-        }
-
-        emit imageUpdated(url, success);
-        reply->deleteLater();
+    // 下载完成后，将二进制解码丢入子线程，不卡 UI
+    QThreadPool::globalInstance()->start([this, url, data]() {
+      QImage image;
+      bool success = image.loadFromData(data);
+      processImageResult(url, image, success, false);
     });
+  });
 }
 
-bool ImageProvider::isRemoteUrl(const QString &url) const
-{
-    const QUrl parsed(url);
-    const QString scheme = parsed.scheme().toLower();
-    return parsed.isValid() && (scheme == QStringLiteral("http") || scheme == QStringLiteral("https"));
+void ImageProvider::loadLocal(const QString& path) {
+  QThreadPool::globalInstance()->start([this, path]() {
+    QImage image;
+    bool success = image.load(path);
+    processImageResult(path, image, success, true);
+  });
 }
 
-int ImageProvider::cacheCost(const QPixmap &pixmap) const
-{
-    const int bytes = qMax(1, pixmap.width() * pixmap.height() * pixmap.depth() / 8);
-    return qMax(1, bytes / 1024);
+QPixmap ImageProvider::cached(const QString& urlOrPath) const {
+  if (urlOrPath.isEmpty()) return QPixmap{};
+
+  QMutexLocker locker(&m_mutex);
+  // 去掉 QFileInfo 校验，只做纯内存查找
+  if (QPixmap* pix = m_cache.object(urlOrPath)) {
+    return *pix;
+  }
+  return QPixmap{};
+}
+
+void ImageProvider::request(const QString& urlOrPath) {
+  if (urlOrPath.isEmpty()) return;
+
+  {
+    QMutexLocker locker(&m_mutex);
+    if (m_inFlight.contains(urlOrPath)) return;
+
+    if (m_cache.contains(urlOrPath)) {
+      if (isRemoteUrl(urlOrPath)) return;
+
+      QFileInfo info(urlOrPath);
+      if (m_localTimestamps.value(urlOrPath) ==
+          info.lastModified().toMSecsSinceEpoch()) {
+        return;
+      }
+    }
+
+    if (isRemoteUrl(urlOrPath)) {
+      if (m_nextRetryAtMs.value(urlOrPath, 0) >
+          QDateTime::currentMSecsSinceEpoch()) {
+        return;
+      }
+    }
+    m_inFlight.insert(urlOrPath);
+  }
+
+  if (isRemoteUrl(urlOrPath)) {
+    loadRemote(urlOrPath);
+  } else {
+    loadLocal(urlOrPath);
+  }
+}
+
+bool ImageProvider::isRemoteUrl(const QString& urlOrPath) const {
+  if (urlOrPath.isEmpty()) return false;
+  return urlOrPath.startsWith(QLatin1String("http"), Qt::CaseInsensitive) &&
+         urlOrPath.contains(QLatin1String("://"));
+}
+
+void ImageProvider::processImageResult(const QString& key, const QImage& image,
+                                       bool success, bool isLocal) {
+  QMetaObject::invokeMethod(
+      this,
+      [this, key, image, success, isLocal]() {
+        if (success && !image.isNull()) {
+          // 在主线程将 QImage 转换为 GPU 优化的 QPixmap
+          QPixmap* pix = new QPixmap(QPixmap::fromImage(image));
+
+          QMutexLocker locker(&m_mutex);
+          m_cache.insert(key, pix, cacheCost(*pix));
+
+          if (isLocal) {
+            m_localTimestamps[key] =
+                QFileInfo(key).lastModified().toMSecsSinceEpoch();
+          } else {
+            m_nextRetryAtMs.remove(key);
+          }
+          m_inFlight.remove(key);
+        } else {
+          QMutexLocker locker(&m_mutex);
+          m_inFlight.remove(key);
+          m_cache.remove(key);
+          if (!isLocal) {
+            m_nextRetryAtMs[key] =
+                QDateTime::currentMSecsSinceEpoch() + kRetryCooldownMs;
+          }
+        }
+        emit imageUpdated(key, success);
+      },
+      Qt::QueuedConnection);
+}
+
+void ImageProvider::clearCache(const QString& urlOrPath) {
+  QMutexLocker locker(&m_mutex);
+  m_cache.remove(urlOrPath);
+  m_localTimestamps.remove(urlOrPath);
+  m_nextRetryAtMs.remove(urlOrPath);
+}
+
+int ImageProvider::cacheCost(const QPixmap& pixmap) const {
+  const int bytes =
+      qMax(1, pixmap.width() * pixmap.height() * pixmap.depth() / 8);
+  return qMax(1, bytes / 1024);
 }

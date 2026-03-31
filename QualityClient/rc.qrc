@@ -177,6 +177,8 @@
         <file>Images/src_003.jpg</file>
         <file>qss/PaginationWidget.qss</file>
         <file>Images/envelope.png</file>
+        <file>Images/arrow-Down.png</file>
+        <file>Images/arrow-On.png</file>
     </qresource>
     <qresource prefix="/style"/>
 </RCC>

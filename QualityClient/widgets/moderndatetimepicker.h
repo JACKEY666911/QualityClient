@@ -2,36 +2,33 @@
 #define MODERNDATETIMEPICKER_H
 
 #include <QWidget>
-#include <QDate>
-#include <QTime>
-#include <QDateTime>
 #include <QLineEdit>
-#include <QGridLayout>
-#include <QLabel>
 #include <QPushButton>
+#include <QLabel>
+#include <QGridLayout>
 #include <QFrame>
+#include <QDateTime>
+#include <QList>
 
-// --- 1. 现代感时间滚轮组件 (内部使用) ---
 class ModernTimeWheel : public QWidget {
     Q_OBJECT
 public:
     explicit ModernTimeWheel(int min, int max, QWidget *parent = nullptr);
-    int value() const { return m_val; }
     void setValue(int v);
+    int value() const { return m_val; }
 
 signals:
     void valueChanged(int v);
 
 protected:
-    void paintEvent(QPaintEvent *event) override;
-    void wheelEvent(QWheelEvent *event) override;
-    void mousePressEvent(QMouseEvent *event) override;
+    void paintEvent(QPaintEvent *) override;
+    void wheelEvent(QWheelEvent *e) override;
+    void mousePressEvent(QMouseEvent *e) override;
 
 private:
     int m_min, m_max, m_val;
 };
 
-// --- 2. 弹出式日期时间面板 (内部使用) ---
 class DateTimePickerPanel : public QWidget {
     Q_OBJECT
 public:
@@ -41,34 +38,41 @@ public:
 signals:
     void dateTimeChanged(const QDateTime &dt);
 
+protected:
+    void showEvent(QShowEvent *event) override;
+
 private slots:
-    void updateCalendar();
     void onConfirm();
+    void updateCalendar();
 
 private:
     void setupUI();
-
-    QFrame *m_container;
-    QDate m_viewDate, m_selectedDate;
-    QGridLayout *m_calendarGrid;
+    QDate m_selectedDate;
+    QDate m_viewDate;
     QLabel *m_titleLabel;
+    QGridLayout *m_calendarGrid;
+    QList<QPushButton*> m_dateButtons;
     ModernTimeWheel *m_hour, *m_min, *m_sec;
+    QFrame *m_container;
 };
 
-// --- 3. 最终组合控件 (对外接口) ---
 class ModernDateTimeEdit : public QLineEdit {
     Q_OBJECT
 public:
     explicit ModernDateTimeEdit(QWidget *parent = nullptr);
-    QDateTime dateTime() const { return m_dt; }
     void setDateTime(const QDateTime &dt);
+    QDateTime dateTime() const { return m_dt; }
 
 protected:
     void mousePressEvent(QMouseEvent *e) override;
+    void mouseDoubleClickEvent(QMouseEvent *e) override;
+    void paintEvent(QPaintEvent *e) override;
+    bool eventFilter(QObject *watched, QEvent *event) override;
 
 private:
     QDateTime m_dt;
     DateTimePickerPanel *m_panel;
+    qint64 m_lastHideTime = 0;
 };
 
-#endif // MODERNDATETIMEPICKER_H
+#endif

@@ -1,0 +1,12 @@
+BasedOnStyle: LLVM
+Standard: Cpp11
+IncludeBlocks: Regroup
+IncludeCategories:
+  - Regex: '^<.*\.(h|hpp)>'
+    Priority: 3
+  - Regex: "^<.*"
+    Priority: 4
+  - Regex: "^<Q.*"
+    Priority: 5
+  - Regex: ".*"
+    Priority: 6
